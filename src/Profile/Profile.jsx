@@ -514,7 +514,14 @@ if (!profile) return null
       boxShadow: theme.palette.mode === 'dark'
         ? '0 20px 40px rgba(0,0,0,0.6)'
         : '0 10px 30px rgba(0,0,0,0.1)',
-      position: 'relative'
+      position: 'relative',
+             [theme.breakpoints.down('sm')]: {
+        width: '100vw',
+        height: '100vh',
+        margin: 0,
+         borderRadius: 0,
+        maxHeight: 'none'
+      }
     }
   }}
 >
@@ -537,7 +544,7 @@ if (!profile) return null
 </IconButton>
 
       {/* رأس المودال */}
-      <Box px={4} pt={4}>
+      <Box sx={{pt:{xs:2,md:4},px:{xs:1,md:4}}}>
         <Typography variant="h6" mb={2} sx={{ color: theme.palette.text.primary }}>
           {t('ProductReviews')} : {commentsModalProduct.name}
         </Typography>
@@ -546,9 +553,9 @@ if (!profile) return null
           src={commentsModalProduct.image_url}
           alt={commentsModalProduct.name}
           sx={{
+            height: { xs: 200, sm: 50, md: 240 },
             width: '100%',
-            height: 240,
-            objectFit: 'cover',
+             objectFit: 'cover',
             borderRadius: 3,
             boxShadow: theme.palette.mode === 'dark'
               ? '0 4px 12px rgba(255,255,255,0.1)'
@@ -559,7 +566,7 @@ if (!profile) return null
       </Box>
 
       {/* التعليقات */}
-      <DialogContentText sx={{ px: 4, pb: 2, overflowY: 'auto', flex: 1 }}>
+      <DialogContentText sx={{ px: 3, pb: 0,[theme.breakpoints.down('sm')]: { px:1 }, overflowY: 'auto', flex: 1 }}>
         {comments.length === 0 ? (
           <Typography sx={{ color: theme.palette.text.secondary }}>
             {t('Therearenocommentsyet')}
@@ -567,7 +574,7 @@ if (!profile) return null
         ) : (
           <Box display="flex" flexDirection="column" gap={2}>
             {comments.map(c => (
-           <Card key={c.id} elevation={0} sx={{ borderRadius: 2, bgcolor: theme.palette.mode === 'dark' ? '#2d2d2d' : '#fafafa', px: 2, py: 1 }}>
+           <Card key={c.id} elevation={0} sx={{ borderRadius: 2, bgcolor: theme.palette.mode === 'dark' ? '#2d2d2d' : '#fafafa' ,pt:1 }}>
   <CardContent sx={{ display: 'flex', gap: 2, padding: 0 }}>
     <IconButton onClick={() => navigate(`/profiledetails/${c.profiles?.id}`)}>
       <Avatar src={c.profiles?.avatar_url || '/default-avatar.png'} />
@@ -621,8 +628,8 @@ if (!profile) return null
       {/* مدخل التعليق */}
       <Box
         sx={{
-          px: 4,
-          py: 3,
+          px: {xs:1,md:3},
+          py: {xs:1,md:3},
           borderTop: `1px solid ${theme.palette.divider}`,
                 backgroundColor: theme.palette.mode === 'dark' ? '#3b3b3bff' : '#fff',
         }}

@@ -437,26 +437,36 @@ const handleAddToCart = async (product) => {
           bgcolor: theme.palette.background.default,
           overflow: 'hidden',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          
+ [theme.breakpoints.down('sm')]: {
+        width: '100vw',
+        height: '100vh',
+        margin: 0,
+        borderRadius: 0,
+        maxHeight: 'none'
+      }
         }
       }}
     >
       {selectedProduct && (
         <>
-          {/* زر الإغلاق */}
-          <IconButton
-            onClick={() => setSelectedProduct(null)}
-            sx={{
-              position: 'absolute',
-              top: 16,
-              right: 16,
-              bgcolor: theme.palette.mode === 'dark' ? '#444' : '#fff',
-              boxShadow: 2,
-              zIndex: 20
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
+                {/* زر الإغلاق */}
+             <IconButton
+                onClick={() => setSelectedProduct(null)}
+                sx={{
+                  position: 'absolute',
+                  top: 12,
+         ...(i18n.language === 'ar' ? { left: 12 } : { right: 12 }),
+        
+                  bgcolor: theme.palette.mode === 'dark' ? '#444' : 'rgba(255,255,255,0.8)',
+                  color: theme.palette.text.primary,
+                  zIndex: 10,
+                  boxShadow: 1
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
 
           {/* أيقونة Sidebar للشاشات الصغيرة */}
           <IconButton

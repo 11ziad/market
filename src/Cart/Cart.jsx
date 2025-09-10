@@ -28,6 +28,9 @@ export default function Cart() {
  const { t } = useTranslation()
        const theme = useTheme();
   const navigate = useNavigate()
+    const { i18n } = useTranslation()
+  
+const isArabic = i18n.language === 'ar'
 
 useEffect(() => {
   const fetchUserAndCart = async () => {
@@ -159,7 +162,9 @@ const handleDeleteComment = async (commentId, productId) => {
       <Card
         key={item.id}
         sx={{
-          borderRadius: 4,
+  [theme.breakpoints.down('sm')]: {
+    transform: isArabic ? 'translateX(5px)' : 'translateX(-5px)'
+  },          borderRadius: 4,
           overflow: 'hidden',
           bgcolor: theme.palette.background.paper,
           boxShadow: theme.palette.mode === 'dark'
@@ -315,10 +320,17 @@ const handleDeleteComment = async (commentId, productId) => {
       borderRadius: 4,
       boxShadow: theme.palette.mode === 'dark' ? '0 20px 40px rgba(0,0,0,0.6)' : 10,
       bgcolor: theme.palette.background.paper,
-      maxHeight: '90vh',
+      maxHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      position: 'relative'
+      position: 'relative',
+       [theme.breakpoints.down('sm')]: {
+        width: '100vw',
+        height: '100vh',
+        margin: 0,
+         borderRadius: 0,
+        maxHeight: 'none'
+      }
     }
   }}
 >
@@ -330,7 +342,8 @@ const handleDeleteComment = async (commentId, productId) => {
         sx={{
           position: 'absolute',
           top: 12,
-          right: 12,
+ ...(i18n.language === 'ar' ? { left: 12 } : { right: 12 }),
+
           bgcolor: theme.palette.mode === 'dark' ? '#444' : 'rgba(255,255,255,0.8)',
           color: theme.palette.text.primary,
           zIndex: 10,
@@ -341,8 +354,8 @@ const handleDeleteComment = async (commentId, productId) => {
       </IconButton>
 
       {/* صورة المنتج خارج الـ scroll */}
-      <Box sx={{ px: 4, pt: 4 }}>
-        <Typography variant="h6" mb={2} sx={{ color: theme.palette.text.primary }}>
+      <Box sx={{ px: {sm:0,md:6}, pt: 1 }}>
+        <Typography variant="h6" mb={2} mt={1} sx={{ color: theme.palette.text.primary }}>
           {t('Commentson')} : {selectedProductForComments.name}
         </Typography>
         <Box
@@ -351,8 +364,7 @@ const handleDeleteComment = async (commentId, productId) => {
           alt={selectedProductForComments.name}
           sx={{
             width: '100%',
-            height: 240,
-            objectFit: 'cover',
+height: { xs: 200, sm: 50, md: 240 },            objectFit: 'cover',
             borderRadius: 3,
             boxShadow: theme.palette.mode === 'dark'
               ? '0 4px 12px rgba(255,255,255,0.1)'
@@ -363,7 +375,7 @@ const handleDeleteComment = async (commentId, productId) => {
       </Box>
 
       {/* التعليقات داخل scroll */}
-      <DialogContent sx={{ px: 4, pb: 2, overflowY: 'auto', flex: 1 }}>
+      <DialogContent sx={{ px: 4,[theme.breakpoints.down('sm')]: { padding:1 }, pb: 2, overflowY: 'auto', flex: 1 }}>
         {Array.isArray(commentsMap[selectedProductForComments?.id]) &&
         commentsMap[selectedProductForComments.id].length > 0 ? (
           <Box display="flex" flexDirection="column" gap={2}>
@@ -428,8 +440,8 @@ const handleDeleteComment = async (commentId, productId) => {
       {/* مدخل التعليق */}
       <Box
         sx={{
-          px: 4,
-          py: 3,
+          px: {xs:1,md:4},
+          py: {xs:1,md:3},
           borderTop: `1px solid ${theme.palette.divider}`,
          }}
       >
@@ -437,7 +449,7 @@ const handleDeleteComment = async (commentId, productId) => {
           <TextField
             fullWidth
             multiline
-            rows={1.5}
+            rows={1 }
             value={commentTextMap[selectedProductForComments.id] || ''}
             onChange={(e) =>
               setCommentTextMap(prev => ({
@@ -466,14 +478,12 @@ const handleDeleteComment = async (commentId, productId) => {
           <Button
             variant="contained"
             color="primary"
-            startIcon={<SendIcon />}
+            startIcon={<SendIcon  sx={{ml: isArabic ? 1.5 : 0}}/>}
             sx={{
               height: 'fit-content',
               alignSelf: 'flex-start',
-              borderRadius: 3,
-              py:{md:1},
-              mt:1
-            }}
+              borderRadius: 2,
+              }}
             disabled={!commentTextMap[selectedProductForComments.id]?.trim()}
             onClick={() => handleAddComment(selectedProductForComments.id)}
           >

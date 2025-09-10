@@ -280,7 +280,7 @@ localStorage.setItem('forceUnreadCount', count || 0)
       transition: 'width 0.3s ease',
       position: { xs: 'absolute', md: 'static' },
       height: '100vh',
-      zIndex: 10
+      zIndex: 0
     }}
   >
     {/* ✅ زر إغلاق مظبوط في العربي والإنجليزي */}

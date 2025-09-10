@@ -249,7 +249,7 @@ return (
         position: 'fixed',
         top: 80,
         [isArabic ? 'right' : 'left']: 16,
-        zIndex: 1500,
+        zIndex: 20,
         bgcolor: '#fff',
         boxShadow: 3,
         borderRadius: 2
@@ -664,7 +664,7 @@ return (
   maxWidth="lg"
   PaperProps={{
     sx: {
-      '@keyframes fadeInScale': {
+       '@keyframes fadeInScale': {
         '0%': { opacity: 0, transform: 'scale(0.95)' },
         '100%': { opacity: 1, transform: 'scale(1)' }
       },
@@ -677,7 +677,17 @@ return (
       maxHeight: '95vh',
       display: 'flex',
       flexDirection: 'column',
-bgcolor:theme.palette.mode === 'dark' ? '#070707ff' : '#f9f9f9'
+bgcolor:theme.palette.mode === 'dark' ? '#070707ff' : '#f9f9f9',
+
+ [theme.breakpoints.down('sm')]: {
+        width: '100vw',
+        height: '100vh',
+        margin: 0,
+        borderRadius: 0,
+        maxHeight: 'none'
+      }
+
+
     }
   }}
 >
@@ -791,10 +801,22 @@ bgcolor:theme.palette.mode === 'dark' ? '#070707ff' : '#f9f9f9'
                   sx={{
                     borderRadius: 3,
                     bgcolor: theme.palette.mode === 'dark' ? '#191919ff' : '#edededff',
-                    color: theme.palette.text.primary
+                    color: theme.palette.text.primary,
+                     padding:1, // القيمة الأساسية
+      [theme.breakpoints.down('sm')]: {
+        padding: 1, // تقليل البادينج في الشاشات الصغيرة
+        gap: 1.5,     // ممكن تقلل الـ gap كمان لو حابب
+      },
+
+                    
                   }}
                 >
-                  <CardContent sx={{ display: 'flex', gap: 2 }}>
+                  <CardContent sx={{ display: 'flex', gap: 2 , padding: 1, // القيمة الأساسية
+      [theme.breakpoints.down('sm')]: {
+        padding: 0, // تقليل البادينج في الشاشات الصغيرة
+        gap: 1.5,     // ممكن تقلل الـ gap كمان لو حابب
+      },
+}}>
                     <Avatar src={c.profiles?.avatar_url || '/default-avatar.png'} sx={{ width: 48, height: 48 }} />
                     <Box flex={1}>
                       <Typography variant="body1" fontWeight="bold">
@@ -899,7 +921,7 @@ bgcolor:theme.palette.mode === 'dark' ? '#070707ff' : '#f9f9f9'
     <Box
   display="flex"
   flexDirection="row"
-  gap={2}
+  gap={1}
   flexWrap={{ xs: 'wrap', sm: 'nowrap' }}
   alignItems="flex-start"
 >
@@ -933,7 +955,7 @@ bgcolor:theme.palette.mode === 'dark' ? '#070707ff' : '#f9f9f9'
     variant="contained"
     color="primary"
     sx={{
-      minWidth: 100,
+      minWidth: {sm:20,md:100},
       height: 40,
       borderRadius: 3,
       alignSelf: 'center',
