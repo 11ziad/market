@@ -11,6 +11,11 @@ import {
   Tooltip,
   Menu,
   MenuItem,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
 } from '@mui/material';
 import MailIcon from '@mui/icons-material/Mail';
 import TranslateIcon from '@mui/icons-material/Translate';
@@ -18,6 +23,7 @@ import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LogoutIcon from '@mui/icons-material/Logout';
+import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '@mui/material/styles';
@@ -26,6 +32,7 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [language, setLanguage] = useState(localStorage.getItem('preferredLanguage') || 'ar');
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -54,9 +61,9 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
   };
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
+  const handleMenuClose = () => setAnchorEl(null);
+
+  const toggleDrawer = (open) => () => setDrawerOpen(open);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -72,96 +79,223 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
     return () => listener.subscription.unsubscribe();
   }, []);
 
+  const guestContent = (
+    <>
+      <IconButton onClick={handleLanguageChange} sx={{ color: '#fff' }}>
+        <TranslateIcon />
+      </IconButton>
+      <IconButton onClick={toggleTheme} sx={{ color: '#fff' }}>
+        {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+      </IconButton>
+      <Button
+        component={Link}
+        to="/signin"
+        variant="outlined"
+        sx={{
+          borderColor: '#fff',
+          color: '#fff',
+          borderRadius: 2,
+          textTransform: 'none',
+          '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
+        }}
+      >
+        Sign In
+      </Button>
+      <Button
+        component={Link}
+        to="/newauth"
+        variant="outlined"
+        sx={{
+          borderColor: '#fff',
+          color: '#fff',
+          borderRadius: 2,
+          textTransform: 'none',
+          '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
+        }}
+      >
+        Register
+      </Button>
+    </>
+  );
+
   return (
-    <AppBar position="sticky" sx={{ bgcolor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'primary.main', boxShadow: 4 }}>
-      <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', px: { xs: 2, md: 4 } }}>
-        <Link to="/" style={{ textDecoration: 'none', color: '#fff' }}>
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            🛍️ ZiadShop
-          </Typography>
-        </Link>
+    <>
+      <AppBar position="sticky" sx={{ bgcolor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'primary.main', boxShadow: 4 }}>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', px: { xs: 2, md: 4 } }}>
+          <Link to="/" style={{ textDecoration: 'none', color: '#fff' }}>
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              🛍️ ZiadShop
+            </Typography>
+          </Link>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {!isLoggedIn ? (
-            // قبل تسجيل الدخول
-            <>
-              <IconButton onClick={handleLanguageChange} sx={{ color: '#fff' }}>
-                <TranslateIcon />
-              </IconButton>
-              <IconButton onClick={toggleTheme} sx={{ color: '#fff' }}>
-                {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
-              </IconButton>
-              <Button
-                component={Link}
-                to="/signin"
-                variant="outlined"
-                sx={{
-                  borderColor: '#fff',
-                  color: '#fff',
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
-                }}
-              >
-                Sign In
-              </Button>
-              <Button
-                component={Link}
-                to="/newauth"
-                variant="outlined"
-                sx={{
-                  borderColor: '#fff',
-                  color: '#fff',
-                  borderRadius: 2,
-                  textTransform: 'none',
-                  '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
-                }}
-              >
-                Register
-              </Button>
-            </>
-          ) : (
-            // بعد تسجيل الدخول
-            <>
-              <Button component={Link} to="/" sx={{ color: '#fff', textTransform: 'none' }}>{t('Allproducts')}</Button>
-              <Button component={Link} to="/addProduct" sx={{ color: '#fff', textTransform: 'none' }}>{t('addProduct')}</Button>
-              <Button component={Link} to="/cart" sx={{ color: '#fff', textTransform: 'none' }}>{t('cart')}</Button>
-              <Button component={Link} to="/profile" sx={{ color: '#fff', textTransform: 'none' }}>{t('profile')}</Button>
-              <Tooltip title={t('messages')}>
-                <IconButton component={Link} to="/message" sx={{ color: '#fff' }}>
-                  <Badge color="error" variant={unreadCount > 0 ? 'dot' : 'standard'}>
-                    <MailIcon />
-                  </Badge>
+          {/* Desktop View */}
+          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
+            {!isLoggedIn ? guestContent : (
+              <>
+                <Button component={Link} to="/" sx={{ color: '#fff', textTransform: 'none' }}>{t('Allproducts')}</Button>
+                <Button component={Link} to="/addProduct" sx={{ color: '#fff', textTransform: 'none' }}>{t('addProduct')}</Button>
+                <Button component={Link} to="/cart" sx={{ color: '#fff', textTransform: 'none' }}>{t('cart')}</Button>
+                <Button component={Link} to="/profile" sx={{ color: '#fff', textTransform: 'none' }}>{t('profile')}</Button>
+                <Tooltip title={t('messages')}>
+                  <IconButton component={Link} to="/message" sx={{ color: '#fff' }}>
+                    <Badge color="error" variant={unreadCount > 0 ? 'dot' : 'standard'}>
+                      <MailIcon />
+                    </Badge>
+                  </IconButton>
+                </Tooltip>
+                <IconButton onClick={handleMenuOpen} sx={{ color: '#fff' }}>
+                  <SettingsIcon />
                 </IconButton>
-              </Tooltip>
+                <Menu
+                  anchorEl={anchorEl}
+                  open={Boolean(anchorEl)}
+                  onClose={handleMenuClose}
+                  PaperProps={{ sx: { borderRadius: 2, mt: 1 } }}
+                >
+                  <MenuItem onClick={handleLanguageChange}>
+                    <TranslateIcon fontSize="small" sx={{ mr: 1 }} />
+                    {language === 'ar' ? 'English' : 'العربية'}
+                  </MenuItem>
+                  <MenuItem onClick={() => { toggleTheme(); handleMenuClose(); }}>
+                    {isDarkMode ? <LightModeIcon fontSize="small" sx={{ mr: 1 }} /> : <DarkModeIcon fontSize="small" sx={{ mr: 1 }} />}
+                    {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                  </MenuItem>
+                  <MenuItem onClick={handleLogout}>
+                    <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
+                    {t('logout')}
+                  </MenuItem>
+                </Menu>
+              </>
+            )}
+          </Box>
 
-              {/* Settings Menu */}
-              <IconButton onClick={handleMenuOpen} sx={{ color: '#fff' }}>
-                <SettingsIcon />
-              </IconButton>
-              <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-                PaperProps={{ sx: { borderRadius: 2, mt: 1 } }}
-              >
-                <MenuItem onClick={handleLanguageChange}>
-                  <TranslateIcon fontSize="small" sx={{ mr: 1 }} />
-                  {language === 'ar' ? 'English' : 'العربية'}
-                </MenuItem>
-                <MenuItem onClick={() => { toggleTheme(); handleMenuClose(); }}>
-                  {isDarkMode ? <LightModeIcon fontSize="small" sx={{ mr: 1 }} /> : <DarkModeIcon fontSize="small" sx={{ mr: 1 }} />}
-                  {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>
-                  <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
-                  {t('logout')}
-                </MenuItem>
-              </Menu>
-            </>
-          )}
-        </Box>
-      </Toolbar>
-    </AppBar>
+          {/* Mobile View */}
+          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+            <IconButton onClick={toggleDrawer(true)} sx={{ color: '#fff' }}>
+              <MenuIcon />
+            </IconButton>
+          </Box>
+        </Toolbar>
+      </AppBar>
+
+      {/* Drawer for Mobile */}
+      <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+  <List sx={{ width: 260, bgcolor: theme.palette.mode === 'dark' ? '#1c1c1c' : '#fff', height: '100%' }}>
+    {!isLoggedIn ? (
+      <>
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/signin"
+            sx={{
+              '&:hover': { bgcolor: theme.palette.action.hover }
+            }}
+          >
+            <ListItemText primary="Sign In" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/newauth"
+            sx={{
+              '&:hover': { bgcolor: theme.palette.action.hover }
+            }}
+          >
+            <ListItemText primary="Register" />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            onClick={handleLanguageChange}
+            sx={{
+              '&:hover': { bgcolor: theme.palette.action.hover },
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            <TranslateIcon sx={{ mr: 2 }} />
+            <ListItemText primary={language === 'ar' ? 'English' : 'العربية'} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            onClick={toggleTheme}
+            sx={{
+              '&:hover': { bgcolor: theme.palette.action.hover },
+              display: 'flex',
+              alignItems: 'center'
+            }}
+          >
+            {isDarkMode ? <LightModeIcon sx={{ mr: 2 }} /> : <DarkModeIcon sx={{ mr: 2 }} />}
+            <ListItemText primary={isDarkMode ? 'Light Mode' : 'Dark Mode'} />
+          </ListItemButton>
+        </ListItem>
+      </>
+    ) : (
+      <>
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/"
+            sx={{ '&:hover': { bgcolor: theme.palette.action.hover } }}
+          >
+            <ListItemText primary={t('Allproducts')} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/addProduct"
+            sx={{ '&:hover': { bgcolor: theme.palette.action.hover } }}
+          >
+            <ListItemText primary={t('addProduct')} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/cart"
+            sx={{ '&:hover': { bgcolor: theme.palette.action.hover } }}
+          >
+            <ListItemText primary={t('cart')} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/profile"
+            sx={{ '&:hover': { bgcolor: theme.palette.action.hover } }}
+          >
+            <ListItemText primary={t('profile')} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            component={Link}
+            to="/message"
+            sx={{ '&:hover': { bgcolor: theme.palette.action.hover }, display: 'flex', alignItems: 'center' }}
+          >
+            <Badge color="error" variant={unreadCount > 0 ? 'dot' : 'standard'}>
+              <MailIcon sx={{ mr: 2 }} />
+            </Badge>
+            <ListItemText primary={t('messages')} />
+          </ListItemButton>
+        </ListItem>
+        <ListItem disablePadding>
+          <ListItemButton
+            onClick={handleMenuOpen}
+            sx={{ '&:hover': { bgcolor: theme.palette.action.hover }, display: 'flex', alignItems: 'center' }}
+          >
+            <SettingsIcon sx={{ mr: 2 }} />
+            <ListItemText primary={t('settings')} />
+          </ListItemButton>
+        </ListItem>
+      </>
+    )}
+  </List>
+</Drawer>
+
+    </>
   );
 }
