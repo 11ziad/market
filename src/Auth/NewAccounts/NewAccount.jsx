@@ -12,6 +12,7 @@ import {
   useTheme,
   Paper
 } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 
 export default function NewAccount() {
   const [email, setEmail] = useState('')
@@ -25,12 +26,12 @@ export default function NewAccount() {
   const [successMsg, setSuccessMsg] = useState('')
   const navigate = useNavigate()
   const theme = useTheme()
-
-  const validateForm = () => {
-    if (!fullName.trim()) return 'الاسم الكامل مطلوب'
-    if (!phone.match(/^[0-9]{10,15}$/)) return 'رقم الهاتف غير صحيح'
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return 'البريد الإلكتروني غير صحيح'
-    if (password.length < 6) return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'
+    const { t } = useTranslation()
+   const validateForm = () => {
+    if (!fullName.trim()) return t('Fullnamerequired')
+    if (!phone.match(/^[0-9]{10,15}$/)) return t('Invalidphonenumber')
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return t('Invalidemail')
+    if (password.length < 6) return t('Passwordmustbeatleast6characterslong')
     return null
   }
 
@@ -85,7 +86,7 @@ export default function NewAccount() {
       })
       if (upsertError) throw upsertError
 
-      setSuccessMsg('🎉 تم إنشاء الحساب بنجاح!')
+      setSuccessMsg(t('The accounthasbeencreatedsuccessfully'))
       setTimeout(() => navigate('/profile'), 800)
     } catch (err) {
       console.error('Signup Error:', err)
@@ -134,7 +135,7 @@ export default function NewAccount() {
           fontWeight={700}
           sx={{ color: theme.palette.primary.main }}
         >
-            إنشاء حساب جديد
+            {t('Createanewaccount')}
         </Typography>
 
         {errorMsg && <Alert severity="error" sx={{ mb: 2 }}>{errorMsg}</Alert>}
@@ -157,12 +158,12 @@ export default function NewAccount() {
           fullWidth
           sx={{ mb: 2, borderRadius: 2, textTransform: 'none' }}
         >
-          اختر صورة شخصية
+       {t('Chooseapersonalphoto')}   
           <input type="file" accept="image/*" hidden onChange={handleAvatarChange} />
         </Button>
 
         <TextField
-          label="الاسم الكامل"
+          label={t('fullname')}
           value={fullName}
           onChange={(e) => setFullName(e.target.value)}
           fullWidth
@@ -172,7 +173,7 @@ export default function NewAccount() {
         />
 
         <TextField
-          label="رقم الهاتف"
+          label={t('phonenumber')}
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           fullWidth
@@ -182,7 +183,7 @@ export default function NewAccount() {
         />
 
         <TextField
-          label="البريد الإلكتروني"
+          label={t('email')}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -193,7 +194,7 @@ export default function NewAccount() {
         />
 
         <TextField
-          label="كلمة المرور"
+          label= {t('password')}
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
@@ -211,7 +212,7 @@ export default function NewAccount() {
           sx={{ mt: 2, py: 1.2, borderRadius: 2, fontWeight: 600, textTransform: 'none' }}
           disabled={loading}
         >
-          {loading ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : 'تسجيل جديد'}
+          {loading ? <CircularProgress size={22} sx={{ color: '#fff' }} /> : t("Newregistration")}
         </Button>
 
         <NavLink
@@ -225,7 +226,7 @@ export default function NewAccount() {
             textDecoration: 'none'
           }}
         >
-          لديك حساب بالفعل؟ تسجيل دخول
+          {t('Alreadyhaveanaccountlogin')}
         </NavLink>
       </Paper>
     </Box>

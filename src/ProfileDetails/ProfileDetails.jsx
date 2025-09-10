@@ -441,7 +441,7 @@ const handleAddToCart = async (product) => {
           
  [theme.breakpoints.down('sm')]: {
         width: '100vw',
-        height: '100vh',
+        height: '97vh',
         margin: 0,
         borderRadius: 0,
         maxHeight: 'none'

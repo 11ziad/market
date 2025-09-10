@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { supabase } from '../../supabaseClient'
-import { useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 
 // MUI
 import {
@@ -16,6 +16,7 @@ import {
   IconButton
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
+import { useTranslation } from 'react-i18next'
 
 export default function SignIn() {
   const [email, setEmail] = useState('')
@@ -25,6 +26,9 @@ export default function SignIn() {
   const [successMsg, setSuccessMsg] = useState('')
   const navigate = useNavigate()
   const theme = useTheme()
+   const { i18n } = useTranslation()
+   const { t } = useTranslation()
+const isArabic = i18n.language === 'ar'
 
   useEffect(() => {
     // اخفاء رسائل الخطأ بعد 4 ثواني (اختياري)
@@ -42,8 +46,8 @@ export default function SignIn() {
   }, [successMsg])
 
   const validateForm = () => {
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return 'البريد الإلكتروني غير صحيح'
-    if (!password) return 'كلمة المرور مطلوبة'
+    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return t('Invalidemail')
+    if (!password) return t('Passwordrequired')
     return null
   }
 
@@ -75,7 +79,7 @@ export default function SignIn() {
 
       localStorage.setItem('profile', JSON.stringify(profileData))
 
-      setSuccessMsg('✅ تم تسجيل الدخول بنجاح')
+      setSuccessMsg(t('Youhavebeenloggedinsuccessfully'))
       setTimeout(() => navigate('/'), 1200)
     } catch (err) {
       setErrorMsg(err.message || 'فشل تسجيل الدخول')
@@ -118,47 +122,53 @@ export default function SignIn() {
         }}
       >
         {/* تنبيهات عائمة (لا تزيد الارتفاع) */}
-        {errorMsg && (
-          <Alert
-            severity="error"
-            sx={{
-              position: 'absolute',
-              top: 12,
-              left: 12,
-              right: 12,
-              zIndex: 20,
-              borderRadius: 2,
-            }}
-            action={
-              <IconButton size="small" onClick={() => setErrorMsg('')}>
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            }
-          >
-            {errorMsg}
-          </Alert>
-        )}
+  {errorMsg && (
+  <Alert
+    severity="error"
+    sx={{
+      position: 'absolute',
+      top: -12,
+      left: 12,
+      right: 13,
+      zIndex: 20,
+      borderRadius: 2,
+      display: 'flex',
+flexDirection: isArabic ? 'row-reverse' : 'row',
+      alignItems: 'center'
+    }}
+    action={
+      <IconButton size="small" onClick={() => setErrorMsg('')}>
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    }
+  >
+    {errorMsg}
+  </Alert>
+)}
 
-        {successMsg && (
-          <Alert
-            severity="success"
-            sx={{
-              position: 'absolute',
-              top: 12,
-              left: 12,
-              right: 12,
-              zIndex: 20,
-              borderRadius: 2,
-            }}
-            action={
-              <IconButton size="small" onClick={() => setSuccessMsg('')}>
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            }
-          >
-            {successMsg}
-          </Alert>
-        )}
+{successMsg && (
+  <Alert
+    severity="success"
+    sx={{
+      position: 'absolute',
+      top: -12,
+      left: 12,
+      right: 13,
+      zIndex: 20,
+      borderRadius: 2,
+      display: 'flex',
+      flexDirection: 'row-reverse',
+      alignItems: 'center'
+    }}
+    action={
+      <IconButton size="small" onClick={() => setSuccessMsg('')}>
+        <CloseIcon fontSize="small" />
+      </IconButton>
+    }
+  >
+    {successMsg}
+  </Alert>
+)}
 
         {/* محتوى الفورم – نضيف margin-top لو في alert ظاهر علشان ما يخبيش العنوان */}
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mt: (errorMsg || successMsg) ? 4 : 0 }}>
@@ -168,11 +178,11 @@ export default function SignIn() {
             fontWeight={700}
             sx={{ color: theme.palette.primary.main }}
           >
-              تسجيل دخول
-          </Typography>
+            {t('Login')}
+              </Typography>
 
           <TextField
-            label="البريد الإلكتروني"
+            label={t('email')}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -190,7 +200,7 @@ export default function SignIn() {
           />
 
           <TextField
-            label="كلمة المرور"
+            label={t('password')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -206,53 +216,53 @@ export default function SignIn() {
               }
             }}
           />
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleSignIn}
-            fullWidth
-            disabled={loading}
-            sx={{
-              mt: 1,
-              py: 1.1,
-              borderRadius: 2,
-              fontWeight: 700,
-              textTransform: 'none'
-            }}
-          >
-            {loading ? <CircularProgress size={20} thickness={5} sx={{ color: '#fff' }} /> : 'تسجيل دخول'}
-          </Button>
-
+             
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={handleSignIn}
+                            fullWidth
+                            disabled={loading}
+                            sx={{
+                              mt: 1,
+                              py: 1.1,
+                              borderRadius: 2,
+                              fontWeight: 700,
+                              textTransform: 'none'
+                            }}
+                          >
+                            {loading ? <CircularProgress size={20} thickness={5} sx={{ color: '#fff' }} /> : t('Login')}
+                          </Button>
           {/* روابط أنيقة - بجانب بعض لكن تتكسر عمودياً على الشاشات الصغيرة */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', gap: 1, mt: 1, flexWrap: 'wrap' }}>
-            <Link
+          <Box sx={{ display: 'flex', justifyContent: 'center',flexDirection:'column',alignItems:'center', gap: 1, mt: 1, flexWrap: 'wrap' }}>
+            <NavLink style={{ color: '#42a5f7ff' }}
+
               component="button"
               onClick={() => navigate('/newauth')}
               sx={{
                 fontSize: '0.95rem',
                 fontWeight: 600,
-                color: theme.palette.primary.main,
                 textTransform: 'none',
                 '&:hover': { textDecoration: 'underline' }
               }}
             >
-              ليس لديك حساب؟
-            </Link>
+             {t('Donthaveanaccount')}
+            </NavLink>
 
-            <Link
+            <NavLink style={{ color: '#42a5f7ff' }}
+
               component="button"
               onClick={() => navigate('/newpassword')}
               sx={{
                 fontSize: '0.9rem',
-                color: theme.palette.text.secondary,
                 textTransform: 'none',
                 '&:hover': { textDecoration: 'underline' }
               }}
             >
-              نسيت كلمة المرور؟
-            </Link>
+              {t('Forgotyourpassword')}
+            </NavLink>
           </Box>
+   
         </Box>
       </Paper>
     </Box>

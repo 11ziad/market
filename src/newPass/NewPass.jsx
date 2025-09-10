@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from '../supabaseClient';
 import { Box, Button, TextField, Typography, Alert, CircularProgress, Paper, useTheme } from '@mui/material';
 import { NavLink } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function NewPass() {
   const theme = useTheme();
@@ -10,10 +11,11 @@ export default function NewPass() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-
+   const { i18n } = useTranslation()
+   const { t } = useTranslation()
   const handleResetPassword = async () => {
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      setErrorMsg('البريد الإلكتروني غير صحيح');
+      setErrorMsg(t('Invalidemail'));
       return;
     }
 
@@ -25,7 +27,7 @@ export default function NewPass() {
       const { error } = await supabase.auth.resetPasswordForEmail(email);
       if (error) throw error;
 
-      setSuccessMsg('📩 تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني');
+      setSuccessMsg(t('Apasswordresetlinkhasbeensenttoyouremail'));
     } catch (err) {
       setErrorMsg(err.message || 'حدث خطأ أثناء إرسال الرابط');
     } finally {
@@ -65,14 +67,14 @@ export default function NewPass() {
           mb={3}
           sx={{ color: theme.palette.primary.main }}
         >
-          🔒 نسيت كلمة المرور؟
+          {t('Iforgotmypassword')}
         </Typography>
 
         {errorMsg && <Alert severity="error" sx={{ mb: 2 }}>{errorMsg}</Alert>}
         {successMsg && <Alert severity="success" sx={{ mb: 2 }}>{successMsg}</Alert>}
 
         <TextField
-          label="البريد الإلكتروني"
+          label={t('email')}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -109,12 +111,12 @@ export default function NewPass() {
           }}
           disabled={loading}
         >
-          {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'إرسال رابط إعادة التعيين'}
+          {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : t('Sendresetlink')}
         </Button>
 
         <Box mt={2} textAlign="center">
-          <NavLink to="/signin" style={{ color: theme.palette.primary.main, textDecoration: 'none', fontWeight: 500 }}>
-            الرجوع لتسجيل الدخول
+          <NavLink to="/signin" style={{ color: theme.palette.primary.main , fontWeight: 500 }}>
+          {t("Backtologin")}
           </NavLink>
         </Box>
       </Paper>

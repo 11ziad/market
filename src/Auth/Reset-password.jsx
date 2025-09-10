@@ -11,6 +11,7 @@ import {
   useTheme
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 export default function ResetPassword() {
   const theme = useTheme();
@@ -20,6 +21,7 @@ export default function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+   const { t } = useTranslation();
 
   useEffect(() => {
     const checkSession = async () => {
@@ -31,7 +33,7 @@ export default function ResetPassword() {
 
   const handlePasswordReset = async () => {
     if (newPassword.length < 6) {
-      setErrorMsg('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      setErrorMsg(t('Passwordmustbeatleast6characterslong'));
       return;
     }
 
@@ -43,7 +45,7 @@ export default function ResetPassword() {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
 
-      setSuccessMsg('✅ تم تحديث كلمة المرور بنجاح، سيتم تحويلك إلى صفحة تسجيل الدخول...');
+      setSuccessMsg(t('Yourpasswordhasbeenupdatedsuccessfullyyouwillberedirectedtotheloginpage'));
       setTimeout(() => navigate('/signin'), 2000);
     } catch (err) {
       setErrorMsg(err.message || 'حدث خطأ أثناء تحديث كلمة المرور');
@@ -60,7 +62,8 @@ export default function ResetPassword() {
       minHeight="100vh"
       sx={{
         bgcolor: theme.palette.background.default,
-        p: 2
+        p: 2,
+        transition: 'background-color 0.3s ease'
       }}
     >
       <Paper
@@ -91,14 +94,36 @@ export default function ResetPassword() {
           mb={3}
           sx={{ color: theme.palette.primary.main }}
         >
-          🔐 إعادة تعيين كلمة المرور
+          {t('Resetpassword')}
         </Typography>
 
-        {errorMsg && <Alert severity="error" sx={{ mb: 2 }}>{errorMsg}</Alert>}
-        {successMsg && <Alert severity="success" sx={{ mb: 2 }}>{successMsg}</Alert>}
+        {errorMsg && (
+          <Alert
+            severity="error"
+            sx={{
+              mb: 2,
+              bgcolor: theme.palette.mode === 'dark' ? '#2a2a2a' : undefined,
+              color: theme.palette.text.primary
+            }}
+          >
+            {errorMsg}
+          </Alert>
+        )}
+        {successMsg && (
+          <Alert
+            severity="success"
+            sx={{
+              mb: 2,
+              bgcolor: theme.palette.mode === 'dark' ? '#1e2b1e' : undefined,
+              color: theme.palette.text.primary
+            }}
+          >
+            {successMsg}
+          </Alert>
+        )}
 
         <TextField
-          label="كلمة المرور الجديدة"
+          label={t('NewPassword')}
           type="password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
@@ -109,7 +134,8 @@ export default function ResetPassword() {
             '& .MuiInputBase-root': {
               borderRadius: 3,
               bgcolor: theme.palette.mode === 'dark' ? '#1c1c1c' : '#fff',
-              color: theme.palette.text.primary
+              color: theme.palette.text.primary,
+              transition: 'background-color 0.3s ease'
             },
             '& .MuiOutlinedInput-notchedOutline': {
               borderColor: theme.palette.mode === 'dark' ? '#555' : '#ccc'
@@ -137,11 +163,15 @@ export default function ResetPassword() {
             textTransform: 'none',
             boxShadow: theme.palette.mode === 'dark'
               ? '0px 6px 15px rgba(0,0,0,0.6)'
-              : '0px 6px 15px rgba(0,0,0,0.2)'
+              : '0px 6px 15px rgba(0,0,0,0.2)',
+            '&:disabled': {
+              bgcolor: theme.palette.mode === 'dark' ? '#333' : '#ccc',
+              color: theme.palette.mode === 'dark' ? '#888' : '#666'
+            }
           }}
           disabled={loading}
         >
-          {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : 'تحديث كلمة المرور'}
+          {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : t('Updatepassword')}
         </Button>
       </Paper>
     </Box>
