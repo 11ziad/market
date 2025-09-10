@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { supabase } from '../../src/supabaseClient';
 import {
   Box,
@@ -23,13 +23,7 @@ export default function ResetPassword() {
   const [successMsg, setSuccessMsg] = useState('');
    const { t } = useTranslation();
 
-  useEffect(() => {
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) navigate('/signin');
-    };
-    checkSession();
-  }, [navigate]);
+ 
 
   const handlePasswordReset = async () => {
     if (newPassword.length < 6) {
