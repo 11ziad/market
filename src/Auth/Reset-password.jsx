@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../../src/supabaseClient';
 import {
   Box,
@@ -16,14 +16,26 @@ import { useTranslation } from 'react-i18next';
 export default function ResetPassword() {
   const theme = useTheme();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
-   const { t } = useTranslation();
+  const [sessionReady, setSessionReady] = useState(false);
 
- 
+  // تحقق من الجلسة أول ما الصفحة تفتح
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (session && !error) {
+        setSessionReady(true); // الجلسة جاهزة، اعرض الفورم
+      } else {
+        setErrorMsg('الرابط غير صالح أو انتهت صلاحيته. افتح الرابط من الإيميل مباشرة.');
+      }
+    };
+    checkSession();
+  }, []);
 
   const handlePasswordReset = async () => {
     if (newPassword.length < 6) {
@@ -92,81 +104,72 @@ export default function ResetPassword() {
         </Typography>
 
         {errorMsg && (
-          <Alert
-            severity="error"
-            sx={{
-              mb: 2,
-              bgcolor: theme.palette.mode === 'dark' ? '#2a2a2a' : undefined,
-              color: theme.palette.text.primary
-            }}
-          >
+          <Alert severity="error" sx={{ mb: 2 }}>
             {errorMsg}
           </Alert>
         )}
+
         {successMsg && (
-          <Alert
-            severity="success"
-            sx={{
-              mb: 2,
-              bgcolor: theme.palette.mode === 'dark' ? '#1e2b1e' : undefined,
-              color: theme.palette.text.primary
-            }}
-          >
+          <Alert severity="success" sx={{ mb: 2 }}>
             {successMsg}
           </Alert>
         )}
 
-        <TextField
-          label={t('NewPassword')}
-          type="password"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-          fullWidth
-          margin="normal"
-          variant="outlined"
-          sx={{
-            '& .MuiInputBase-root': {
-              borderRadius: 3,
-              bgcolor: theme.palette.mode === 'dark' ? '#1c1c1c' : '#fff',
-              color: theme.palette.text.primary,
-              transition: 'background-color 0.3s ease'
-            },
-            '& .MuiOutlinedInput-notchedOutline': {
-              borderColor: theme.palette.mode === 'dark' ? '#555' : '#ccc'
-            },
-            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-              borderColor: theme.palette.primary.main
-            },
-            '& .MuiInputLabel-root': {
-              color: theme.palette.text.secondary
-            }
-          }}
-        />
+        {sessionReady && (
+          <>
+            <TextField
+              label={t('NewPassword')}
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              fullWidth
+              margin="normal"
+              variant="outlined"
+              sx={{
+                '& .MuiInputBase-root': {
+                  borderRadius: 3,
+                  bgcolor: theme.palette.mode === 'dark' ? '#1c1c1c' : '#fff',
+                  color: theme.palette.text.primary,
+                  transition: 'background-color 0.3s ease'
+                },
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: theme.palette.mode === 'dark' ? '#555' : '#ccc'
+                },
+                '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: theme.palette.primary.main
+                },
+                '& .MuiInputLabel-root': {
+                  color: theme.palette.text.secondary
+                }
+              }}
+            />
 
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handlePasswordReset}
-          fullWidth
-          sx={{
-            mt: 3,
-            py: 1.2,
-            borderRadius: 3,
-            fontSize: '1rem',
-            fontWeight: 'bold',
-            textTransform: 'none',
-            boxShadow: theme.palette.mode === 'dark'
-              ? '0px 6px 15px rgba(0,0,0,0.6)'
-              : '0px 6px 15px rgba(0,0,0,0.2)',
-            '&:disabled': {
-              bgcolor: theme.palette.mode === 'dark' ? '#333' : '#ccc',
-              color: theme.palette.mode === 'dark' ? '#888' : '#666'
-            }
-          }}
-          disabled={loading}
-        >
-          {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : t('Updatepassword')}
-        </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handlePasswordReset}
+              fullWidth
+              sx={{
+                mt: 3,
+                py: 1.2,
+                borderRadius: 3,
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                textTransform: 'none',
+                boxShadow: theme.palette.mode === 'dark'
+                  ? '0px 6px 15px rgba(0,0,0,0.6)'
+                  : '0px 6px 15px rgba(0,0,0,0.2)',
+                '&:disabled': {
+                  bgcolor: theme.palette.mode === 'dark' ? '#333' : '#ccc',
+                  color: theme.palette.mode === 'dark' ? '#888' : '#666'
+                }
+              }}
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={24} sx={{ color: '#fff' }} /> : t('Updatepassword')}
+            </Button>
+          </>
+        )}
       </Paper>
     </Box>
   );

@@ -13,6 +13,7 @@ import Message from './Message/Message';
 import Cart from './Cart/Cart';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider, CssBaseline, createTheme } from '@mui/material';
+import { useTranslation } from 'react-i18next'; // ⬅️ مهم علشان نعرف اللغة
 
 const routers = createBrowserRouter([
   {
@@ -33,26 +34,11 @@ const routers = createBrowserRouter([
   },
 ]);
 
-const lightTheme = createTheme({
-  palette: {
-    mode: 'light',
-     background: {
-      default: '#ffffffff',
-      }
-
-  },
-});
-
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-  },
-});
-
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const { i18n } = useTranslation(); // ⬅️ نجيب اللغة الحالية
+  const isArabic = i18n.language === 'ar';
 
-  // حفظ التفضيل في localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem('preferredTheme');
     if (savedTheme === 'dark') setIsDarkMode(true);
@@ -64,25 +50,41 @@ function App() {
 
   const toggleTheme = () => setIsDarkMode(prev => !prev);
 
+  const fontFamily = isArabic
+    ? 'IBM Plex Sans Arabic, sans-serif'
+    : 'Inter, sans-serif';
+
+  const theme = createTheme({
+    palette: {
+      mode: isDarkMode ? 'dark' : 'light',
+      background: {
+        default: isDarkMode ? '#121212' : '#ffffff'
+      }
+    },
+    direction: isArabic ? 'rtl' : 'ltr',
+    typography: {
+      fontFamily
+    }
+  });
+
   return (
-    <ThemeProvider theme={isDarkMode ? darkTheme : lightTheme}>
+    <ThemeProvider theme={theme}>
       <CssBaseline />
       <Toaster position="top-center" />
-    <RouterProvider
-
-  router={createBrowserRouter([
-    {
-      path: '',
-      element: (
-        <Layout
-          toggleTheme={toggleTheme}
-          isDarkMode={isDarkMode}
-        />
-      ),
-      children: routers.routes[0].children,
-    },
-  ])}
-/>
+      <RouterProvider
+        router={createBrowserRouter([
+          {
+            path: '',
+            element: (
+              <Layout
+                toggleTheme={toggleTheme}
+                isDarkMode={isDarkMode}
+              />
+            ),
+            children: routers.routes[0].children,
+          },
+        ])}
+      />
     </ThemeProvider>
   );
 }

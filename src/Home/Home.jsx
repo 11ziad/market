@@ -266,9 +266,10 @@ return (
     position: 'fixed',
     top: { xs: 0, md: 24 },
     [isArabic ? 'right' : 'left']: 0,
-    width: { xs: '85%', sm: '90%', md: 280 },
+    width: { xs: '85%', sm: '90%', md: 290 },
     height: { xs: '100vh', md: 'calc(100vh - 18px)' },
     overflowY: 'auto',
+    overflowX:'hidden',
     bgcolor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#f5f5f5',
     p: 4,
     borderRadius: { xs: 0, md: 3 },
@@ -349,6 +350,14 @@ return (
     {t('Pricefromto')}
   </Typography>
 
+<Box
+  sx={{
+    width: 210,
+    mb: 3,
+    direction: isArabic ? 'rtl' : 'ltr', // ⬅️ ده اللي بيظبط الاتجاه فعليًا
+    textAlign: isArabic ? 'right' : 'left'
+  }}
+>
   <Slider
     value={priceRange}
     onChange={(e, newValue) => setPriceRange(newValue)}
@@ -356,7 +365,6 @@ return (
     min={0}
     max={10000}
     sx={{
-      mb: 3,
       color: theme.palette.primary.main,
       '& .MuiSlider-thumb': {
         '&:hover': {
@@ -369,7 +377,7 @@ return (
       }
     }}
   />
-
+</Box>
   <TextField
     label={t('Classification')}
     value={categoryFilter}
