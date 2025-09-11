@@ -13,6 +13,7 @@ import CommentIcon from '@mui/icons-material/Comment'
 import SendIcon from '@mui/icons-material/Send'
 import { useNavigate } from 'react-router-dom'
 import CloseIcon from '@mui/icons-material/Close'
+import RemoveShoppingCartIcon from '@mui/icons-material/RemoveShoppingCart';
 import { useTranslation } from 'react-i18next'
  import { alpha } from '@mui/material/styles';
 import toast from 'react-hot-toast'
@@ -152,157 +153,199 @@ const handleDeleteComment = async (commentId, productId) => {
       <Typography variant="h5" mb={3} fontWeight="bold">🛒 {t('Yourbasket')}</Typography>
 
       {cartItems.length === 0 ? (
-        <Typography>لا توجد منتجات في السلة</Typography>
+           <Box
+    display="flex"
+    flexDirection="column"
+    alignItems="center"
+    justifyContent="center"
+    height="300px" // ✅ ارتفاع مناسب للتوسيط
+    gap={2}
+  >
+    <RemoveShoppingCartIcon
+      sx={{
+        fontSize: 64,
+        color: theme.palette.mode === 'dark' ? '#777' : '#ccc'
+      }}
+    />
+    <Typography
+      variant="h6"
+      fontWeight="bold"
+      sx={{ color: theme.palette.text.secondary }}
+    >
+      {t('Therearenoproductsinthecart')}
+    </Typography>
+  </Box>
+
       ) : (
        <Box display="grid" gridTemplateColumns="repeat(auto-fill, minmax(320px, 1fr))" gap={3}>
   {cartItems.map(item => {
     const product = item.products;
 
     return (
-      <Card
-        key={item.id}
-        sx={{
-  [theme.breakpoints.down('sm')]: {
-    transform: isArabic ? 'translateX(5px)' : 'translateX(-5px)'
-  },          borderRadius: 4,
-          overflow: 'hidden',
-          bgcolor: theme.palette.background.paper,
-          boxShadow: theme.palette.mode === 'dark'
-            ? '0 8px 20px rgba(0,0,0,0.4)'
-            : '0 8px 20px rgba(0,0,0,0.1)',
-          transition: 'all 0.3s',
-          '&:hover': {
-            transform: 'translateY(-6px)',
-            boxShadow: theme.palette.mode === 'dark'
-              ? '0 12px 30px rgba(0,0,0,0.6)'
-              : '0 12px 30px rgba(0,0,0,0.15)'
-          }
-        }}
+     <Card
+  key={item.id}
+  sx={{
+    [theme.breakpoints.down('sm')]: {
+      transform: isArabic ? 'translateX(5px)' : 'translateX(-5px)'
+    },
+    borderRadius: 4,
+    overflow: 'hidden',
+    bgcolor: theme.palette.background.paper,
+    boxShadow: theme.palette.mode === 'dark'
+      ? '0 8px 20px rgba(0,0,0,0.4)'
+      : '0 8px 20px rgba(0,0,0,0.1)',
+    transition: 'all 0.3s',
+    height: 500, // ✅ طول ثابت للكارد
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    '&:hover': {
+      transform: 'translateY(-6px)',
+      boxShadow: theme.palette.mode === 'dark'
+        ? '0 12px 30px rgba(0,0,0,0.6)'
+        : '0 12px 30px rgba(0,0,0,0.15)'
+    }
+  }}
+>
+  <Box position="relative">
+    {/* ✅ صورة المنتج */}
+    <Box
+      component="img"
+      src={product.image_url}
+      alt={product.name}
+      sx={{ width: '100%', height: 200, objectFit: 'cover' }}
+    />
+
+    {/* ✅ رابط لصاحب المنتج */}
+    <Box
+      onClick={() => navigate(`/profiledetails/${product.profiles?.id}`)}
+      sx={{
+        position: 'absolute',
+        top: 12,
+        left: 12,
+        bgcolor: theme.palette.mode === 'dark'
+          ? alpha(theme.palette.background.default, 0.8)
+          : 'rgba(255,255,255,0.9)',
+        p: '4px 10px',
+        borderRadius: 50,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 1,
+        boxShadow: 2,
+        cursor: 'pointer',
+        transition: '0.3s',
+        '&:hover': {
+          bgcolor: theme.palette.mode === 'dark'
+            ? alpha(theme.palette.background.default, 1)
+            : 'rgba(255,255,255,1)',
+          boxShadow: 3
+        }
+      }}
+    >
+      <Avatar src={product.profiles?.avatar_url} sx={{ width: 28, height: 28 }} />
+      <Typography
+        variant="body2"
+        fontWeight="bold"
+        sx={{ color: theme.palette.text.primary }}
       >
-        <Box position="relative">
-          {/* ✅ صورة المنتج */}
-          <Box
-            component="img"
-            src={product.image_url}
-            alt={product.name}
-            sx={{ width: '100%', height: 200, objectFit: 'cover' }}
-          />
+        {product.profiles?.full_name}
+      </Typography>
+    </Box>
 
-          {/* ✅ رابط لصاحب المنتج */}
-          <Box
-            onClick={() => navigate(`/profiledetails/${product.profiles?.id}`)}
-            sx={{
-              position: 'absolute',
-              top: 12,
-              left: 12,
-              bgcolor: theme.palette.mode === 'dark'
-                ? alpha(theme.palette.background.default, 0.8)
-                : 'rgba(255,255,255,0.9)',
-              p: '4px 10px',
-              borderRadius: 50,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 1,
-              boxShadow: 2,
-              cursor: 'pointer',
-              transition: '0.3s',
-              '&:hover': {
-                bgcolor: theme.palette.mode === 'dark'
-                  ? alpha(theme.palette.background.default, 1)
-                  : 'rgba(255,255,255,1)',
-                boxShadow: 3
-              }
-            }}
-          >
-            <Avatar src={product.profiles?.avatar_url} sx={{ width: 28, height: 28 }} />
-            <Typography
-              variant="body2"
-              fontWeight="bold"
-              sx={{ color: theme.palette.text.primary }}
-            >
-              {product.profiles?.full_name}
-            </Typography>
-          </Box>
+    {/* ✅ زر الحذف */}
+    <IconButton
+      onClick={() => handleRemoveFromCart(item.id)}
+      sx={{
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        bgcolor: theme.palette.mode === 'dark' ? '#444' : '#fff',
+        boxShadow: 2
+      }}
+    >
+      <DeleteIcon color="error" />
+    </IconButton>
+  </Box>
 
-          {/* ✅ زر الحذف */}
-          <IconButton
-            onClick={() => handleRemoveFromCart(item.id)}
-            sx={{
-              position: 'absolute',
-              top: 12,
-              right: 12,
-              bgcolor: theme.palette.mode === 'dark' ? '#444' : '#fff',
-              boxShadow: 2
-            }}
-          >
-            <DeleteIcon color="error" />
-          </IconButton>
-        </Box>
+  {/* ✅ تفاصيل المنتج */}
+  <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+<Typography
+  variant="h6"
+  fontWeight="bold"
+  sx={{
+    mb: 1,
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
+  }}
+>
+  {product.name?.split(' ').slice(0, 4).join(' ') + (product.name?.split(' ').length > 4 ? '...' : '')}
+</Typography>
 
-        {/* ✅ تفاصيل المنتج */}
-        <CardContent>
-          <Typography variant="h6" fontWeight="bold" sx={{ mb: 1 }}>
-            {product.name}
-          </Typography>
 
-          <Typography
-            variant="body2"
-            sx={{
-              backgroundColor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#f9f9f9',
-              p: 1.5,
-              borderRadius: 2,
-              fontSize: 14,
-              lineHeight: 1.6,
-              boxShadow: theme.palette.mode === 'dark'
-                ? 'inset 0 1px 3px rgba(255,255,255,0.05)'
-                : 'inset 0 1px 3px rgba(0,0,0,0.05)',
-              mb: 1,
-              color: theme.palette.text.secondary
-            }}
-          >
-            {product.description || 'لا يوجد وصف'}
-          </Typography>
+    <Typography
+      variant="body2"
+      sx={{
+        backgroundColor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#f9f9f9',
+        p: 1.5,
+        borderRadius: 2,
+        fontSize: 14,
+        lineHeight: 1.6,
+        boxShadow: theme.palette.mode === 'dark'
+          ? 'inset 0 1px 3px rgba(255,255,255,0.05)'
+          : 'inset 0 1px 3px rgba(0,0,0,0.05)',
+        mb: 1,
+        color: theme.palette.text.secondary,
+        display: '-webkit-box',
+        WebkitLineClamp: 3, // ✅ سطرين فقط
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
+      }}
+    >
+      {product.description || 'لا يوجد وصف'}
+    </Typography>
 
-          <Typography variant="h6" color="primary" fontWeight="bold">
-            {product.price} {t('pound')}
-          </Typography>
+    <Typography variant="h6" color="primary" fontWeight="bold">
+      {product.price} {t('pound')}
+    </Typography>
 
-          <Divider sx={{ my: 2 }} />
+    <Divider sx={{ my: 2 }} />
 
-          {/* ✅ أيقونات التفاعل */}
-          <Box display="flex" justifyContent="center" gap={2}>
-            <Tooltip title="مراسلة صاحب المنتج">
-              <IconButton
-                sx={{
-                  bgcolor: theme.palette.mode === 'dark' ? '#3a3a3a' : '#f5f5f5',
-                  '&:hover': {
-                    bgcolor: theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'
-                  }
-                }}
-                onClick={() =>
-                  navigate(`/message/${product.profiles?.id}`, { state: { product } })
-                }
-              >
-                <ChatBubbleOutlineIcon />
-              </IconButton>
-            </Tooltip>
+    {/* ✅ أيقونات التفاعل ثابتة في آخر الكارد */}
+    <Box display="flex" justifyContent="center" gap={2} mt="auto">
+      <Tooltip title="مراسلة صاحب المنتج">
+        <IconButton
+          sx={{
+            bgcolor: theme.palette.mode === 'dark' ? '#3a3a3a' : '#f5f5f5',
+            '&:hover': {
+              bgcolor: theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'
+            }
+          }}
+          onClick={() =>
+            navigate(`/message/${product.profiles?.id}`, { state: { product } })
+          }
+        >
+          <ChatBubbleOutlineIcon />
+        </IconButton>
+      </Tooltip>
 
-            <Tooltip title="عرض التعليقات">
-              <IconButton
-                sx={{
-                  bgcolor: theme.palette.mode === 'dark' ? '#3a3a3a' : '#f5f5f5',
-                  '&:hover': {
-                    bgcolor: theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'
-                  }
-                }}
-                onClick={() => openCommentsModal(product)}
-              >
-                <CommentIcon />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        </CardContent>
-      </Card>
+      <Tooltip title="عرض التعليقات">
+        <IconButton
+          sx={{
+            bgcolor: theme.palette.mode === 'dark' ? '#3a3a3a' : '#f5f5f5',
+            '&:hover': {
+              bgcolor: theme.palette.mode === 'dark' ? '#555' : '#e0e0e0'
+            }
+          }}
+          onClick={() => openCommentsModal(product)}
+        >
+          <CommentIcon />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  </CardContent>
+</Card>
     );
   })}
 </Box>

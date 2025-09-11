@@ -305,6 +305,7 @@ const handleAddToCart = async (product) => {
     position: 'relative',
     display: 'flex',
     flexDirection: 'column',
+    justifyContent: 'space-between', // ✅ توزيع المحتوى والـ icon
     borderRadius: 4,
     boxShadow: theme.palette.mode === 'dark'
       ? '0 12px 30px rgba(0,0,0,0.5)'
@@ -319,6 +320,7 @@ const handleAddToCart = async (product) => {
       : '1px solid rgba(255,255,255,0.3)',
     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
     cursor: 'pointer',
+    height: 500, // ✅ طول ثابت للكارد
     '&:hover': {
       transform: 'translateY(-6px)',
       boxShadow: theme.palette.mode === 'dark'
@@ -385,35 +387,49 @@ const handleAddToCart = async (product) => {
   />
 
   {/* ✅ التفاصيل */}
-  <Box p={2} display="flex" flexDirection="column" gap={1}>
+  <Box p={2} display="flex" flexDirection="column" gap={1} sx={{ flexGrow: 1 }}>
     <Typography variant="h6" fontWeight="bold" sx={{ color: theme.palette.text.primary, fontSize: 18 }}>
-      {p.name}
+      {(() => {
+        const name = typeof p.name === 'string' ? p.name.trim() : '';
+        const words = name.split(/\s+/);
+        return words.length > 3 ? words.slice(0, 3).join(' ') + '...' : name;
+      })()}
     </Typography>
+
     <Typography
       variant="body2"
       sx={{
         color: theme.palette.text.secondary,
-              backgroundColor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#f9f9f9',
+        backgroundColor: theme.palette.mode === 'dark' ? '#2a2a2a' : '#f9f9f9',
         p: 1.5,
         borderRadius: 2,
         fontSize: 14,
         lineHeight: 1.6,
         boxShadow: theme.palette.mode === 'dark'
           ? 'inset 0 1px 3px rgba(255,255,255,0.05)'
-          : 'inset 0 1px 3px rgba(0,0,0,0.05)'
+          : 'inset 0 1px 3px rgba(0,0,0,0.05)',
+        display: '-webkit-box',
+        WebkitLineClamp: 2, // ✅ سطرين فقط
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
       }}
     >
       {p.description || 'لا يوجد وصف'}
     </Typography>
+
     <Typography variant="body1" fontWeight="bold" sx={{ color: '#1976d2', fontSize: 16, mt: 1 }}>
       {t('price')}: {p.price} {t('pound')}
     </Typography>
+
     {p.address && (
       <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
         📍 {p.address}
       </Typography>
     )}
   </Box>
+
+ 
 </Box>
           ))}
         </Box>

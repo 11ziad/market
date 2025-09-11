@@ -329,8 +329,8 @@ if (!profile) return null
           <Typography variant="h5" mt={2}>{profile.full_name}</Typography>
           <Typography variant="body2" color="text.secondary">{profile.address || '—'}</Typography>
           <Box mt={2} display="flex" justifyContent="center" gap={2}>
-            <Button variant="outlined" startIcon={<Edit sx={isArabic ? { ml: 1 } : { mr: 0 }} />} onClick={() => setTabIndex(1)}>{t('Editprofile')}</Button>
-            <Button variant="contained" startIcon={<Add sx={isArabic ? { ml: 1 } : { mr: 0 }}  />} onClick={() => navigate('/AddProduct')}>{t('Addproduc')}</Button>
+            <Button sx={{fontSize:{xs:'10px',md:'14px'}}} variant="outlined" startIcon={<Edit sx={isArabic ? { ml: 1 } : { mr: 0 }} />} onClick={() => setTabIndex(1)}>{t('Editprofile')}</Button>
+            <Button sx={{fontSize:{xs:'10px',md:'14px'}}} variant="contained" startIcon={<Add sx={isArabic ? { ml: 1 } : { mr: 0 }}  />} onClick={() => navigate('/AddProduct')}>{t('Addproduc')}</Button>
           </Box>
         </Box>
         <Tabs
@@ -362,12 +362,15 @@ if (!profile) return null
     boxShadow: theme.palette.mode === 'dark'
       ? '0 8px 20px rgba(0,0,0,0.5)'
       : '0 8px 20px rgba(0,0,0,0.1)',
-          border: `1px solid ${theme.palette.divider}`,
-
+    border: `1px solid ${theme.palette.divider}`,
     overflow: 'hidden',
-                backgroundColor: theme.palette.mode === 'dark' ? '#202020ff' : '#edededff',
+    backgroundColor: theme.palette.mode === 'dark' ? '#202020ff' : '#edededff',
     position: 'relative',
     transition: '0.3s',
+    height: 450, // ✅ طول ثابت للكارد
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
     '&:hover': {
       boxShadow: theme.palette.mode === 'dark'
         ? '0 12px 30px rgba(0,0,0,0.7)'
@@ -434,11 +437,18 @@ if (!profile) return null
   </Box>
 
   {/* ✅ بيانات المنتج */}
-  <Box px={2} py={2} display="flex" flexDirection="column" gap={1}>
+  <Box px={2} py={2} display="flex" flexDirection="column" gap={1} sx={{ flexGrow: 1 }}>
     <Typography
       variant="h6"
       fontWeight="bold"
-      sx={{ color: theme.palette.text.primary }}
+      sx={{
+        color: theme.palette.text.primary,
+        display: '-webkit-box',
+        WebkitLineClamp: 1,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
+      }}
     >
       {product.name}
     </Typography>
@@ -454,7 +464,12 @@ if (!profile) return null
         lineHeight: 1.6,
         boxShadow: theme.palette.mode === 'dark'
           ? 'inset 0 1px 3px rgba(255,255,255,0.05)'
-          : 'inset 0 1px 3px rgba(0,0,0,0.05)'
+          : 'inset 0 1px 3px rgba(0,0,0,0.05)',
+        display: '-webkit-box',
+        WebkitLineClamp: 2, // ✅ سطرين فقط
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis'
       }}
     >
       {product.description || 'لا يوجد وصف'}
@@ -472,7 +487,7 @@ if (!profile) return null
     </Typography>
   </Box>
 
-  {/* ✅ أيقونة التعليقات في النص */}
+  {/* ✅ أيقونة التعليقات ثابتة في آخر الكارد */}
   <Box display="flex" justifyContent="center" pb={2}>
     <Tooltip title="عرض التعليقات">
       <IconButton

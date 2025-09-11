@@ -114,7 +114,8 @@ i18n
           Yourpasswordhasbeenupdatedsuccessfullyyouwillberedirectedtotheloginpage:' تم تحديث كلمة المرور بنجاح، سيتم تحويلك إلى صفحة تسجيل الدخول ',
           Resetpassword:'إعادة تعيين كلمة المرور',
           NewPassword:' كلمة المرور الجديدة ',
-          Updatepassword:'تحديث كلمة المرور'
+          Updatepassword:'تحديث كلمة المرور',
+          Therearenoproductsinthecart:'لا توجد منتجات في السلة',
 
            }
       },
@@ -221,7 +222,8 @@ i18n
           Yourpasswordhasbeenupdatedsuccessfullyyouwillberedirectedtotheloginpage:'Your password has been updated successfully, you will be redirected to the login page.',
           Resetpassword:'Reset password',
           NewPassword:'New Password',
-          Updatepassword:'Update password'
+          Updatepassword:'Update password',
+          Therearenoproductsinthecart:'There are no products in the cart.'
 
 
         }

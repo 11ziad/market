@@ -7,8 +7,7 @@ import {
   useMediaQuery
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
-import PhoneIcon from '@mui/icons-material/Phone'
-import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
+ import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
 import PersonIcon from '@mui/icons-material/Person'
 import CloseIcon from '@mui/icons-material/Close'
 import MessageIcon from '@mui/icons-material/Message';
@@ -475,81 +474,77 @@ return (
     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
     cursor: 'pointer',
     maxWidth: { md: 390, xs: 435 },
-    minHeight: 420,
+    height: 450,
     '&:hover': {
       transform: 'translateY(-4px)',
       boxShadow: theme.palette.mode === 'dark'
         ? '0 12px 24px rgba(0,0,0,0.7)'
         : '0 12px 24px rgba(0,0,0,0.15)',
-    }
+    },
   }}
 >
-  {/* ✅ أدوات علوية عند التحويم */}
- {hoveredProductId === p.id && (
-  <Box
-    position="absolute"
-    top={8}
-    sx={{
-      [isArabic ? 'left' : 'right']: 8,
-      zIndex: 2,
-      display: 'flex',
-      gap: 1,
-      bgcolor: theme.palette.mode === 'dark'
-        ? 'rgba(50,50,50,0.85)'
-        : 'rgba(255,255,255,0.7)',
-      backdropFilter: 'blur(8px)',
-      borderRadius: 2,
-      p: 0.5,
-      boxShadow: theme.palette.mode === 'dark'
-        ? '0 0 6px rgba(0,0,0,0.5)'
-        : 1
-    }}
-  >
-    {/* 🛒 زر السلة */}
-    <IconButton
-      onClick={(e) => {
-        e.stopPropagation();
-        handleAddToCart(p);
-      }}
+  {hoveredProductId === p.id && (
+    <Box
+      position="absolute"
+      top={8}
       sx={{
-        color: cartItems.includes(p.id)
-          ? theme.palette.success.main
-          : theme.palette.mode === 'dark'
+        [isArabic ? 'left' : 'right']: 8,
+        zIndex: 2,
+        display: 'flex',
+        gap: 1,
+        bgcolor: theme.palette.mode === 'dark'
+          ? 'rgba(50,50,50,0.85)'
+          : 'rgba(255,255,255,0.7)',
+        backdropFilter: 'blur(8px)',
+        borderRadius: 2,
+        p: 0.5,
+        boxShadow: theme.palette.mode === 'dark'
+          ? '0 0 6px rgba(0,0,0,0.5)'
+          : 1
+      }}
+    >
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          handleAddToCart(p);
+        }}
+        sx={{
+          color: cartItems.includes(p.id)
+            ? theme.palette.success.main
+            : theme.palette.mode === 'dark'
+              ? theme.palette.grey[300]
+              : theme.palette.text.primary,
+          '&:hover': {
+            bgcolor: theme.palette.action.hover,
+            transform: 'scale(1.1)',
+            transition: '0.2s ease-in-out'
+          }
+        }}
+      >
+        <ShoppingCartIcon fontSize="medium" />
+      </IconButton>
+
+      <IconButton
+        onClick={(e) => {
+          e.stopPropagation();
+          handleHideProduct(p.id);
+        }}
+        sx={{
+          color: theme.palette.mode === 'dark'
             ? theme.palette.grey[300]
             : theme.palette.text.primary,
-        '&:hover': {
-          bgcolor: theme.palette.action.hover,
-          transform: 'scale(1.1)',
-          transition: '0.2s ease-in-out'
-        }
-      }}
-    >
-      <ShoppingCartIcon fontSize="medium" />
-    </IconButton>
+          '&:hover': {
+            bgcolor: theme.palette.action.hover,
+            transform: 'scale(1.1)',
+            transition: '0.2s ease-in-out'
+          }
+        }}
+      >
+        <VisibilityOffIcon fontSize="medium" />
+      </IconButton>
+    </Box>
+  )}
 
-    {/* 👁️‍🗨️ زر الإخفاء */}
-    <IconButton
-      onClick={(e) => {
-        e.stopPropagation();
-        handleHideProduct(p.id);
-      }}
-      sx={{
-        color: theme.palette.mode === 'dark'
-          ? theme.palette.grey[300]
-          : theme.palette.text.primary,
-        '&:hover': {
-          bgcolor: theme.palette.action.hover,
-          transform: 'scale(1.1)',
-          transition: '0.2s ease-in-out'
-        }
-      }}
-    >
-      <VisibilityOffIcon fontSize="medium" />
-    </IconButton>
-  </Box>
-)}
-
-  {/* ✅ صاحب المنتج */}
   <Box display="flex" alignItems="center" gap={1} p={1}>
     <Avatar
       src={p.profiles?.avatar_url || '/default-avatar.png'}
@@ -564,7 +559,6 @@ return (
     </Typography>
   </Box>
 
-  {/* ✅ صورة المنتج */}
   <Box
     component="img"
     src={p.image_url}
@@ -586,20 +580,32 @@ return (
     }}
   />
 
-  {/* ✅ التفاصيل */}
-  <Box p={2} display="flex" flexDirection="column" gap={1}>
-    <Typography variant="subtitle1" fontWeight="bold" sx={{ color: theme.palette.text.primary }}>
-      {p.name}
-    </Typography>
+  <Box p={2} display="flex" flexDirection="column" gap={1} flexGrow={1}>
+  <Typography
+  variant="subtitle1"
+  fontWeight="bold"
+  sx={{ color: theme.palette.text.primary }}
+>
+  {(() => {
+    const name = typeof p.name === 'string' ? p.name.trim() : '';
+    const words = name.split(/\s+/);
+    return words.length > 4 ? words.slice(0, 4).join(' ') + '...' : name;
+  })()}
+</Typography>
 
-    <Typography variant="body2" sx={{
-      color: theme.palette.text.secondary,
-      fontSize: 13,
-      lineHeight: 1.5,
-      maxHeight: 40,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis'
-    }}>
+    <Typography
+      variant="body2"
+      sx={{
+        color: theme.palette.text.secondary,
+        fontSize: 13,
+        lineHeight: 1.5,
+        display: '-webkit-box',
+        WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+      }}
+    >
       {p.description || 'لا يوجد وصف'}
     </Typography>
 
@@ -636,7 +642,7 @@ return (
       variant="contained"
       fullWidth
       sx={{
-        mt: 1,
+        mt: 'auto',
         borderRadius: 2,
         textTransform: 'none',
         fontWeight: 600,
@@ -657,7 +663,6 @@ return (
     </Button>
   </Box>
 </Box>
-
 
 
 
