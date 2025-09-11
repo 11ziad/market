@@ -35,7 +35,7 @@ i18n
           send:'إرسال',
           Allproducts:'جميع المنتجات',
           cart:'السلة',
-          profile:'الملف الشلخصي',
+          profile:'الملف الشخصي',
           logout:'تسجيل خروج',
           messages:'الرسائل',
           Addproduc:'أضف منتج',

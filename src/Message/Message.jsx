@@ -242,15 +242,15 @@ localStorage.setItem('forceUnreadCount', count || 0)
   }
 
  return (
-<Box display="flex" sx={{height: {xs:'82vh' , md:'90vh'}}} height="90vh" bgcolor={theme.palette.background.default} position="relative">
+<Box display="flex" sx={{height: {xs:'85vh' , md:'90vh'}}} height="90vh" bgcolor={theme.palette.background.default} position="relative">
   {/* ✅ زر فتح القائمة الجانبية */}
   <IconButton
     onClick={() => setSidebarVisible(true)}
     sx={{
       position: 'absolute',
-      top:-35,
+      top:0,
       [theme.direction === 'rtl' ? 'right' : 'left']: 9,
-      zIndex: 9999,
+      zIndex:3,
       display: { xs: sidebarVisible ? 'none' : 'flex', md: 'none' },
       bgcolor: theme.palette.primary.main,
       color: '#fff',
@@ -278,7 +278,7 @@ localStorage.setItem('forceUnreadCount', count || 0)
     boxShadow: 2,
     transition: 'width 0.3s ease',
     position: { xs: 'absolute', md: 'static' },
-    top: { xs: '-28px', md: 'auto' }, 
+    top: { xs: '-22px', md: 'auto' }, 
     height: { xs: '73vh', md: '90vh' },
     zIndex: 0,
     display: 'flex',
@@ -294,7 +294,8 @@ localStorage.setItem('forceUnreadCount', count || 0)
         display: { xs: 'flex', md: 'none' },
         justifyContent: theme.direction === 'rtl' ? 'flex-end' : 'flex-start',
         px: 2,
-        pt: 2
+        pt: 2,
+        mt:3
       }}
     >
       <IconButton

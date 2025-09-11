@@ -84,10 +84,10 @@ export default function NewAccount() {
         avatar_url: avatarUrl,
         address: ''
       })
+      navigate('/')
       if (upsertError) throw upsertError
 
-      setSuccessMsg(t('The accounthasbeencreatedsuccessfully'))
-      setTimeout(() => navigate('/profile'), 800)
+      setSuccessMsg(t('accounthasbeencreatedsuccessfully'))
     } catch (err) {
       console.error('Signup Error:', err)
       setErrorMsg(err.message || 'حصل خطأ أثناء إنشاء الحساب')

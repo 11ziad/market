@@ -407,7 +407,7 @@ const handleDeleteComment = async (commentId, productId) => {
           alt={selectedProductForComments.name}
           sx={{
             width: '100%',
-height: { xs: 200, sm: 50, md: 240 },            objectFit: 'cover',
+height: { xs: 200, sm: 200, md: 240 },            objectFit: 'cover',
             borderRadius: 3,
             boxShadow: theme.palette.mode === 'dark'
               ? '0 4px 12px rgba(255,255,255,0.1)'

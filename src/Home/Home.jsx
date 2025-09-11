@@ -39,7 +39,6 @@ const [showOwnerDetails, setShowOwnerDetails] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [priceRange, setPriceRange] = useState([0, 10000])
   const [categoryFilter, setCategoryFilter] = useState('')
- 
   const { i18n } = useTranslation()
   const theme = useTheme();
 
@@ -329,7 +328,7 @@ return (
         borderColor: theme.palette.divider
       },
       '& .MuiInputBase-input': {
-        padding: '10px 12px'
+        padding: '10px 9px'
       }
     }}
     InputProps={{
@@ -581,7 +580,7 @@ return (
   />
 
   <Box p={2} display="flex" flexDirection="column" gap={1} flexGrow={1}>
-  <Typography
+<Typography
   variant="subtitle1"
   fontWeight="bold"
   sx={{ color: theme.palette.text.primary }}
@@ -589,7 +588,8 @@ return (
   {(() => {
     const name = typeof p.name === 'string' ? p.name.trim() : '';
     const words = name.split(/\s+/);
-    return words.length > 4 ? words.slice(0, 4).join(' ') + '...' : name;
+    const maxWords = isSmallScreen ? 3 : 4; // 3 للموبايل و4 للشاشات الكبيرة
+    return words.length > maxWords ? words.slice(0, maxWords).join(' ') + '...' : name;
   })()}
 </Typography>
 
