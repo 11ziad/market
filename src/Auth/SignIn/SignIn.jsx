@@ -117,7 +117,6 @@ const isArabic = i18n.language === 'ar'
           py: { xs: 2, sm: 4 },
           borderRadius: 3,
           backdropFilter: 'blur(8px)',
-          background: theme.palette.mode === 'dark' ? '#1e1e1e' : 'rgba(255,255,255,0.88)',
           boxShadow: '0 10px 30px rgba(2,6,23,0.2)'
         }}
       >

@@ -55,9 +55,9 @@ const showSidebar = !isSmallScreen || !otherUserId;
 
   useEffect(() => {
     if (product) {
-      const initialMessage = `🛍️ المنتج: ${product.name}
-💰 السعر: ${product.price} جنيه
-📦 الوصف: ${product.description?.trim() ? product.description : 'لا يوجد وصف'}`
+      const initialMessage = ` المنتج :  ${product.name}
+ السعر  :   ${product.price} جنيه
+ الوصف  :   ${product.description?.trim() ? product.description : 'لا يوجد وصف'}`
       setNewMessage(initialMessage)
     }
   }, [product])
@@ -220,7 +220,7 @@ localStorage.setItem('forceUnreadCount', count || 0)
     let finalMessage = newMessage
 
     if (product?.image_url && productImageVisible) {
-      finalMessage += `\n🖼️ صورة المنتج:\n${product.image_url}`
+      finalMessage += `\n صورة المنتج:\n${product.image_url}`
     }
 
     const { data, error } = await supabase
@@ -242,14 +242,14 @@ localStorage.setItem('forceUnreadCount', count || 0)
   }
 
  return (
-<Box display="flex" height="90vh" bgcolor={theme.palette.background.default} position="relative">
+<Box display="flex" sx={{height: {xs:'82vh' , md:'90vh'}}} height="90vh" bgcolor={theme.palette.background.default} position="relative">
   {/* ✅ زر فتح القائمة الجانبية */}
   <IconButton
     onClick={() => setSidebarVisible(true)}
     sx={{
       position: 'absolute',
-      top: 16,
-      [theme.direction === 'rtl' ? 'left' : 'right']: 26,
+      top:-35,
+      [theme.direction === 'rtl' ? 'right' : 'left']: 9,
       zIndex: 9999,
       display: { xs: sidebarVisible ? 'none' : 'flex', md: 'none' },
       bgcolor: theme.palette.primary.main,
@@ -267,23 +267,28 @@ localStorage.setItem('forceUnreadCount', count || 0)
   </IconButton>
 
   {/* ✅ القائمة الجانبية */}
-  <Box
-    sx={{
-      width: {
-        xs: sidebarVisible ? '180px' : '0px',
-        sm: sidebarVisible ? '180px' : '0px',
-        md: '240px'
-      },
-      bgcolor: theme.palette.mode === 'dark' ? theme.palette.grey[900] : '#fff',
-      boxShadow: 2,
-      overflow: 'auto',
-      transition: 'width 0.3s ease',
-      position: { xs: 'absolute', md: 'static' },
-      height: '100vh',
-      zIndex: 0
-    }}
-  >
-    {/* ✅ زر إغلاق مظبوط في العربي والإنجليزي */}
+<Box
+  sx={{
+    width: {
+      xs: sidebarVisible ? '180px' : '0px',
+      sm: sidebarVisible ? '180px' : '0px',
+      md: '240px'
+    },
+    bgcolor: theme.palette.mode === 'dark' ? theme.palette.grey[900] : '#fff',
+    boxShadow: 2,
+    transition: 'width 0.3s ease',
+    position: { xs: 'absolute', md: 'static' },
+    top: { xs: '-28px', md: 'auto' }, 
+    height: { xs: '73vh', md: '90vh' },
+    zIndex: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden' // ⬅️ مهم علشان يخفي المحتوى لما العرض 0
+  }}
+>
+  {/* ✅ محتوى قابل للإخفاء بالكامل في الشاشات الصغيرة */}
+  <Box sx={{ display: sidebarVisible || theme.breakpoints.up('md') ? 'block' : 'none' }}>
+    {/* زر الإغلاق في الشاشات الصغيرة فقط */}
     <Box
       sx={{
         display: { xs: 'flex', md: 'none' },
@@ -299,8 +304,8 @@ localStorage.setItem('forceUnreadCount', count || 0)
           color: '#fff',
           boxShadow: 3,
           borderRadius: '50%',
-          width: 40,
-          height: 40,
+          width: 30,
+          height: 30,
           transition: '0.2s',
           '&:hover': {
             bgcolor: theme.palette.error.dark
@@ -315,9 +320,13 @@ localStorage.setItem('forceUnreadCount', count || 0)
       {t('Conversations')}
     </Typography>
     <Divider />
+  </Box>
+
+  {/* ✅ Scroll داخلي فقط لقائمة الشاتات */}
+  <Box sx={{ flex: 1, overflowY: 'auto' }}>
     <List>
       {contacts.map(user => (
-        <ListItem 
+        <ListItem
           key={user.id}
           selected={user.id === otherUserId}
           onClick={() => {
@@ -378,6 +387,7 @@ localStorage.setItem('forceUnreadCount', count || 0)
       ))}
     </List>
   </Box>
+</Box>
 
   {/* ✅ منطقة الرسائل */}
   <Box flex={1} display="flex" flexDirection="column">
@@ -467,7 +477,7 @@ localStorage.setItem('forceUnreadCount', count || 0)
           display="flex"
           flexDirection="column"
           gap={1}
-          p={2}
+          p={1}
           bgcolor={theme.palette.background.paper}
           boxShadow={2}
         >
@@ -486,23 +496,36 @@ localStorage.setItem('forceUnreadCount', count || 0)
             />
           )}
 
-          <TextField
-            fullWidth
-            multiline
-            minRows={1}
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder={t('Writeyourmessage')}
-            sx={{
-              '& .MuiInputBase-root': {
-                bgcolor: theme.palette.mode === 'dark' ? '#3a3a3a' : '#fff',
-                color: theme.palette.text.primary
-              }
-            }}
-          />
-          <Button variant="contained" onClick={sendMessage}>
-            {t('send')}
-          </Button>
+         <TextField
+  fullWidth
+  multiline
+  minRows={1}
+  value={newMessage}
+  onChange={(e) => setNewMessage(e.target.value)}
+  placeholder={t('Writeyourmessage')}
+  sx={{
+    '& .MuiInputBase-root': {
+      bgcolor: theme.palette.mode === 'dark' ? '#3a3a3a' : '#fff',
+      color: theme.palette.text.primary,
+      fontSize: { xs: '13px', md: '16px' }, // ⬅️ تصغير الخط في الموبايل
+      padding: { xs: '6px 10px', md: '10px 14px' }, // ⬅️ تصغير الحشو
+      minHeight: { xs: 36, md: 48 } // ⬅️ تصغير الارتفاع
+    }
+  }}
+/>
+
+<Button
+  variant="contained"
+  onClick={sendMessage}
+  sx={{
+    fontSize: { xs: '13px', md: '16px' }, // ⬅️ تصغير الخط في الموبايل
+    padding: { xs: '4px 12px', md: '8px 20px' }, // ⬅️ تصغير الحشو
+    minHeight: { xs: 36, md: 44 }, // ⬅️ تصغير الارتفاع
+   }}
+>
+  {t('send')}
+</Button>
+
         </Box>
       </>
     ) : (

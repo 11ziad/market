@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import {
+  createBrowserRouter,
+  RouterProvider,
+  Navigate
+} from 'react-router-dom';
 import Layout from './Layout/Layout';
 import NewAccount from './Auth/NewAccounts/NewAccount';
 import SignIn from './Auth/SignIn/SignIn';
@@ -13,30 +17,15 @@ import Message from './Message/Message';
 import Cart from './Cart/Cart';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider, CssBaseline, createTheme } from '@mui/material';
-import { useTranslation } from 'react-i18next'; // ⬅️ مهم علشان نعرف اللغة
-
-const routers = createBrowserRouter([
-  {
-    path: '',
-    element: <Layout />,
-    children: [
-      { index: true, element: <Home /> },
-      { path: 'newauth', element: <NewAccount /> },
-      { path: 'signin', element: <SignIn /> },
-      { path: 'newpassword', element: <NewPass /> },
-      { path: 'resetpass', element: <ResetPassword /> },
-      { path: 'profile', element: <Profile /> },
-      { path: 'addProduct', element: <Addproduct /> },
-      { path: 'profiledetails/:id', element: <ProfileDetails /> },
-      { path: 'message/:otherUserId?', element: <Message /> },
-      { path: 'cart', element: <Cart /> },
-    ],
-  },
-]);
+import { useTranslation } from 'react-i18next';
+import { supabase } from './supabaseClient';
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const { i18n } = useTranslation(); // ⬅️ نجيب اللغة الحالية
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const { i18n } = useTranslation();
   const isArabic = i18n.language === 'ar';
 
   useEffect(() => {
@@ -67,24 +56,53 @@ function App() {
     }
   });
 
+  // ✅ التحقق من session عند بداية التطبيق
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+      setLoading(false);
+    };
+
+    checkSession();
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (loading) return null; // أو Spinner لو حابب
+
+  const routers = createBrowserRouter([
+    {
+      path: '',
+      element: (
+        <Layout toggleTheme={toggleTheme} isDarkMode={isDarkMode} />
+      ),
+      children: [
+        { index: true, element: user ? <Home /> : <Navigate to="/signin" /> },
+        { path: 'signin', element: user ? <Navigate to="/" /> : <SignIn /> },
+        { path: 'newauth', element: <NewAccount /> },
+        { path: 'newpassword', element: <NewPass /> },
+        { path: 'resetpass', element: <ResetPassword /> },
+        { path: 'profile', element: user ? <Profile /> : <Navigate to="/signin" /> },
+        { path: 'addProduct', element: user ? <Addproduct /> : <Navigate to="/signin" /> },
+        { path: 'profiledetails/:id', element: user ? <ProfileDetails /> : <Navigate to="/signin" /> },
+        { path: 'message/:otherUserId?', element: user ? <Message /> : <Navigate to="/signin" /> },
+        { path: 'cart', element: user ? <Cart /> : <Navigate to="/signin" /> }
+      ]
+    }
+  ]);
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Toaster position="top-center" />
-      <RouterProvider
-        router={createBrowserRouter([
-          {
-            path: '',
-            element: (
-              <Layout
-                toggleTheme={toggleTheme}
-                isDarkMode={isDarkMode}
-              />
-            ),
-            children: routers.routes[0].children,
-          },
-        ])}
-      />
+      <RouterProvider router={routers} />
     </ThemeProvider>
   );
 }
