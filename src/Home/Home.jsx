@@ -19,7 +19,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
   import TuneIcon from '@mui/icons-material/Tune'
   import { useTranslation } from 'react-i18next'
   import { useTheme } from '@mui/material/styles';
-  
+
 
 export default function Home() {
   const { t } = useTranslation()
@@ -41,7 +41,7 @@ const [showOwnerDetails, setShowOwnerDetails] = useState(false)
   const [categoryFilter, setCategoryFilter] = useState('')
   const { i18n } = useTranslation()
   const theme = useTheme();
-
+  const [selectedImage, setSelectedImage] = useState(null);
 
 const isArabic = i18n.language === 'ar'
 
@@ -744,23 +744,117 @@ bgcolor:theme.palette.mode === 'dark' ? '#070707ff' : '#f9f9f9',
             gap: 2
           }}
         >
-          <Box
-            component="img"
-            src={selectedProduct.image_url}
-            alt={selectedProduct.name}
-            sx={{
-              width: '100%',
-              height: { xs: 220, md: 320 },
-              objectFit: 'cover',
-              borderRadius: 4,
-              mb: 2,
-              boxShadow: theme.palette.mode === 'dark'
-                ? '0 4px 12px rgba(255,255,255,0.1)'
-                : '0 4px 12px rgba(0,0,0,0.1)',
-              transition: 'transform 0.4s ease',
-              '&:hover': { transform: 'scale(1.02)' }
-            }}
-          />
+<Box sx={{ position: 'relative', width: '100%', cursor: 'pointer' }}>
+  <Box
+    onClick={() => setSelectedImage(selectedProduct.image_url)}
+    sx={{
+      width: '100%',
+      height: { xs: 220, md: 320 },
+      borderRadius: 4,
+      mb: 2,
+      overflow: 'hidden',
+      boxShadow: theme.palette.mode === 'dark'
+        ? '0 4px 12px rgba(255,255,255,0.1)'
+        : '0 4px 12px rgba(0,0,0,0.1)',
+      transition: 'transform 0.4s ease',
+      '&:hover img': {
+        transform: 'scale(1.02)'
+      },
+      // هذا هو المهم
+      '&:hover .viewBox': {
+        opacity: 1,
+        zIndex: 999
+      }
+    }}
+  >
+    <Box
+      component="img"
+      src={selectedProduct.image_url}
+      alt={selectedProduct.name}
+      sx={{
+        width: '100%',
+        height: '100%',
+        objectFit: 'cover',
+        transition: 'transform 0.4s ease'
+      }}
+    />
+    <Box
+      className="viewBox"
+      sx={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        borderRadius: 4,
+        bgcolor: 'rgba(0,0,0,0.5)',
+        color: '#fff',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 16,
+        fontWeight: 'bold',
+        opacity: 0,
+        transition: 'opacity 0.3s ease',
+        zIndex: 0
+      }}
+    >
+      view image
+    </Box>
+  </Box>
+</Box>
+
+{/* show full image */}
+          <Dialog
+  open={Boolean(selectedImage)}
+  onClose={() => setSelectedImage(null)}
+  fullScreen
+  PaperProps={{
+    sx: {
+      bgcolor: 'rgba(0,0,0,0.95)',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      p: 0
+    }
+  }}
+>
+  <IconButton
+    onClick={() => setSelectedImage(null)}
+    sx={{
+      position: 'absolute',
+      top: 16,
+      right: 16,
+      color: '#fff',
+      zIndex: 10
+    }}
+  >
+    <CloseIcon />
+  </IconButton>
+
+  <Box
+    component="img"
+    src={selectedImage}
+    alt="عرض الصورة"
+    sx={{
+      width: {
+        xs: '100%',
+        sm: '90%',
+        md: '80%',
+        lg: '70%'
+      },
+      maxHeight: {
+        xs: '80vh',
+        sm: '85vh',
+        md: '90vh'
+      },
+      objectFit: 'contain',
+      borderRadius: 2,
+      boxShadow: '0 0 20px rgba(0,0,0,0.5)',
+      transition: 'all 0.3s ease-in-out'
+    }}
+  />
+</Dialog>
 
           <Typography variant="h5" fontWeight="bold" sx={{ color: theme.palette.text.primary }}>
             {selectedProduct.name}

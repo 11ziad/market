@@ -1,61 +1,44 @@
-import React, { useEffect, useState } from 'react';
-import { supabase } from '../supabaseClient';
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Button,
-  Box,
-  Badge,
-  IconButton,
-  Tooltip,
-  Menu,
-  MenuItem,
-  Drawer,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-} from '@mui/material';
-import MailIcon from '@mui/icons-material/Mail';
-import TranslateIcon from '@mui/icons-material/Translate';
-import DarkModeIcon from '@mui/icons-material/DarkMode';
-import LightModeIcon from '@mui/icons-material/LightMode';
-import SettingsIcon from '@mui/icons-material/Settings';
-import LogoutIcon from '@mui/icons-material/Logout';
-import MenuIcon from '@mui/icons-material/Menu';
-import { Link, useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import { useTheme } from '@mui/material/styles';
- 
+import React, { useEffect, useState } from "react";
+import { supabase } from "../supabaseClient";
+import {AppBar,Toolbar,Typography,Button,Box,Badge,IconButton,Tooltip,Menu,MenuItem,Drawer,List,ListItem,ListItemButton,ListItemText,} from "@mui/material";
+import MailIcon from "@mui/icons-material/Mail";
+import TranslateIcon from "@mui/icons-material/Translate";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import SettingsIcon from "@mui/icons-material/Settings";
+import LogoutIcon from "@mui/icons-material/Logout";
+import MenuIcon from "@mui/icons-material/Menu";
+import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { useTheme } from "@mui/material/styles";
 
 export default function Navbar({ toggleTheme, isDarkMode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [language, setLanguage] = useState(localStorage.getItem('preferredLanguage') || 'ar');
+  const [language, setLanguage] = useState(localStorage.getItem("preferredLanguage") || "ar");
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const theme = useTheme();
 
   useEffect(() => {
     i18n.changeLanguage(language);
-    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.dir = language === "ar" ? "rtl" : "ltr";
     document.documentElement.lang = language;
   }, [language]);
 
   const handleLanguageChange = () => {
-    const newLang = language === 'ar' ? 'en' : 'ar';
+    const newLang = language === "ar" ? "en" : "ar";
     setLanguage(newLang);
-    localStorage.setItem('preferredLanguage', newLang);
+    localStorage.setItem("preferredLanguage", newLang);
     handleMenuClose();
   };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setIsLoggedIn(false);
-    navigate('/signin');
+    navigate("/signin");
     handleMenuClose();
   };
 
@@ -68,13 +51,17 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setIsLoggedIn(!!session);
     };
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(!!session);
-    });
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setIsLoggedIn(!!session);
+      }
+    );
 
     checkSession();
     return () => listener.subscription.unsubscribe();
@@ -82,10 +69,10 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
 
   const guestContent = (
     <>
-      <IconButton onClick={handleLanguageChange} sx={{ color: '#fff' }}>
+      <IconButton onClick={handleLanguageChange} sx={{ color: "#fff" }}>
         <TranslateIcon />
       </IconButton>
-      <IconButton onClick={toggleTheme} sx={{ color: '#fff' }}>
+      <IconButton onClick={toggleTheme} sx={{ color: "#fff" }}>
         {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
       </IconButton>
       <Button
@@ -93,11 +80,11 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
         to="/signin"
         variant="outlined"
         sx={{
-          borderColor: '#fff',
-          color: '#fff',
+          borderColor: "#fff",
+          color: "#fff",
           borderRadius: 2,
-          textTransform: 'none',
-          '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
+          textTransform: "none",
+          "&:hover": { backgroundColor: "rgba(255,255,255,0.1)" },
         }}
       >
         Sign In
@@ -107,11 +94,11 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
         to="/newauth"
         variant="outlined"
         sx={{
-          borderColor: '#fff',
-          color: '#fff',
+          borderColor: "#fff",
+          color: "#fff",
           borderRadius: 2,
-          textTransform: 'none',
-          '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' }
+          textTransform: "none",
+          "&:hover": { backgroundColor: "rgba(255,255,255,0.1)" },
         }}
       >
         Register
@@ -121,30 +108,81 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
 
   return (
     <>
-      <AppBar position="sticky" sx={{ bgcolor: theme.palette.mode === 'dark' ? '#1e1e1e' : 'primary.main', boxShadow: 4 }}>
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', px: { xs: 2, md: 4 } }}>
-          <Link to="/" style={{ textDecoration: 'none', color: '#fff' }}>
+      <AppBar
+        position="sticky"
+        sx={{
+          bgcolor: theme.palette.mode === "dark" ? "#1e1e1e" : "primary.main",
+          boxShadow: 4,
+        }}
+      >
+        <Toolbar
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            px: { xs: 2, md: 4 },
+          }}
+        >
+          <Link to="/" style={{ textDecoration: "none", color: "#fff" }}>
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               🛍️ ZiadShop
             </Typography>
           </Link>
 
           {/* Desktop View */}
-          <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
-            {!isLoggedIn ? guestContent : (
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            {!isLoggedIn ? (
+              guestContent
+            ) : (
               <>
-                <Button component={Link} to="/" sx={{ color: '#fff', textTransform: 'none' }}>{t('Allproducts')}</Button>
-                <Button component={Link} to="/addProduct" sx={{ color: '#fff', textTransform: 'none' }}>{t('addProduct')}</Button>
-                <Button component={Link} to="/cart" sx={{ color: '#fff', textTransform: 'none' }}>{t('cart')}</Button>
-                <Button component={Link} to="/profile" sx={{ color: '#fff', textTransform: 'none' }}>{t('profile')}</Button>
-                <Tooltip title={t('messages')}>
-                  <IconButton component={Link} to="/message" sx={{ color: '#fff' }}>
-                    <Badge color="error" variant={unreadCount > 0 ? 'dot' : 'standard'}>
+                <Button
+                  component={Link}
+                  to="/"
+                  sx={{ color: "#fff", textTransform: "none" }}
+                >
+                  {t("Allproducts")}
+                </Button>
+                <Button
+                  component={Link}
+                  to="/addProduct"
+                  sx={{ color: "#fff", textTransform: "none" }}
+                >
+                  {t("addProduct")}
+                </Button>
+                <Button
+                  component={Link}
+                  to="/cart"
+                  sx={{ color: "#fff", textTransform: "none" }}
+                >
+                  {t("cart")}
+                </Button>
+                <Button
+                  component={Link}
+                  to="/profile"
+                  sx={{ color: "#fff", textTransform: "none" }}
+                >
+                  {t("profile")}
+                </Button>
+                <Tooltip title={t("messages")}>
+                  <IconButton
+                    component={Link}
+                    to="/message"
+                    sx={{ color: "#fff" }}
+                  >
+                    <Badge
+                      color="error"
+                      variant={unreadCount > 0 ? "dot" : "standard"}
+                    >
                       <MailIcon />
                     </Badge>
                   </IconButton>
                 </Tooltip>
-                <IconButton onClick={handleMenuOpen} sx={{ color: '#fff' }}>
+                <IconButton onClick={handleMenuOpen} sx={{ color: "#fff" }}>
                   <SettingsIcon />
                 </IconButton>
                 <Menu
@@ -155,15 +193,24 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
                 >
                   <MenuItem onClick={handleLanguageChange}>
                     <TranslateIcon fontSize="small" sx={{ mr: 1 }} />
-                    {language === 'ar' ? 'English' : 'العربية'}
+                    {language === "ar" ? "English" : "العربية"}
                   </MenuItem>
-                  <MenuItem onClick={() => { toggleTheme(); handleMenuClose(); }}>
-                    {isDarkMode ? <LightModeIcon fontSize="small" sx={{ mr: 1 }} /> : <DarkModeIcon fontSize="small" sx={{ mr: 1 }} />}
-                    {isDarkMode ? 'Light Mode' : 'Dark Mode'}
+                  <MenuItem
+                    onClick={() => {
+                      toggleTheme();
+                      handleMenuClose();
+                    }}
+                  >
+                    {isDarkMode ? (
+                      <LightModeIcon fontSize="small" sx={{ mr: 1 }} />
+                    ) : (
+                      <DarkModeIcon fontSize="small" sx={{ mr: 1 }} />
+                    )}
+                    {isDarkMode ? "Light Mode" : "Dark Mode"}
                   </MenuItem>
                   <MenuItem onClick={handleLogout}>
                     <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
-                    {t('logout')}
+                    {t("logout")}
                   </MenuItem>
                 </Menu>
               </>
@@ -171,8 +218,8 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
           </Box>
 
           {/* Mobile View */}
-          <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-            <IconButton onClick={toggleDrawer(true)} sx={{ color: '#fff' }}>
+          <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            <IconButton onClick={toggleDrawer(true)} sx={{ color: "#fff" }}>
               <MenuIcon />
             </IconButton>
           </Box>
@@ -180,101 +227,133 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
       </AppBar>
 
       {/* Drawer for Mobile */}
-  {/* Mobile View */}
- 
+      {/* Mobile View */}
 
-{/* Drawer for Mobile */}
-<Drawer
-  anchor={language === 'ar' ? 'right' : 'left'}
-  open={drawerOpen}
-  onClose={toggleDrawer(false)}
-  PaperProps={{
-    sx: {
-      width: 260,
-      bgcolor: theme.palette.mode === 'dark' ? '#1c1c1c' : '#fff',
-      height: '100%',
-      // 👇 نمنع الحركة العكسية في RTL
-      transform: 'none !important',
-      direction: 'ltr', // الورقة نفسها دايمًا LTR علشان الأنيميشن يشتغل صح
-      display: 'flex',
-      flexDirection: 'column',
-      px: 2
-    }
-  }}
->
-  {/* 👇 المحتوى جوه الورقة بياخد اتجاه اللغة */}
-  <Box sx={{ direction: language === 'ar' ? 'rtl' : 'ltr', textAlign: language === 'ar' ? 'right' : 'left' }}>
-    <List>
-      {!isLoggedIn ? (
-        <>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/signin">
-              <ListItemText primary="Sign In" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/newauth">
-              <ListItemText primary="Register" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton onClick={handleLanguageChange} sx={{ display: 'flex', alignItems: 'center' }}>
-              <TranslateIcon sx={{ [language === 'ar' ? 'ml' : 'mr']: 2 }} />
-              <ListItemText primary={language === 'ar' ? 'English' : 'العربية'} />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton onClick={toggleTheme} sx={{ display: 'flex', alignItems: 'center' }}>
-              {isDarkMode
-                ? <LightModeIcon sx={{ [language === 'ar' ? 'ml' : 'mr']: 2 }} />
-                : <DarkModeIcon sx={{ [language === 'ar' ? 'ml' : 'mr']: 2 }} />}
-              <ListItemText primary={isDarkMode ? 'Light Mode' : 'Dark Mode'} />
-            </ListItemButton>
-          </ListItem>
-        </>
-      ) : (
-        <>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/">
-              <ListItemText primary={t('Allproducts')} />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/addProduct">
-              <ListItemText primary={t('addProduct')} />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/cart">
-              <ListItemText primary={t('cart')} />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/profile">
-              <ListItemText primary={t('profile')} />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component={Link} to="/message" sx={{ display: 'flex', alignItems: 'center' }}>
-              <Badge color="error" variant={unreadCount > 0 ? 'dot' : 'standard'}>
-                <MailIcon sx={{ [language === 'ar' ? 'ml' : 'mr']: 2 }} />
-              </Badge>
-              <ListItemText primary={t('messages')} />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton onClick={handleMenuOpen} sx={{ display: 'flex', alignItems: 'center' }}>
-              <SettingsIcon sx={{ [language === 'ar' ? 'ml' : 'mr']: 2 }} />
-              <ListItemText primary={t('settings')} />
-            </ListItemButton>
-          </ListItem>
-        </>
-      )}
-    </List>
-  </Box>
-</Drawer>
-
-
+      {/* Drawer for Mobile */}
+      <Drawer
+        anchor={language === "ar" ? "right" : "left"}
+        open={drawerOpen}
+        onClose={toggleDrawer(false)}
+        PaperProps={{
+          sx: {
+            width: 260,
+            bgcolor: theme.palette.mode === "dark" ? "#1c1c1c" : "#fff",
+            height: "100%",
+           
+            transform: "none !important",
+            direction: "ltr",  
+            display: "flex",
+            flexDirection: "column",
+            px: 2,
+          },
+        }}
+      >
+        
+        <Box
+          sx={{
+            direction: language === "ar" ? "rtl" : "ltr",
+            textAlign: language === "ar" ? "right" : "left",
+          }}
+        >
+          <List>
+            {!isLoggedIn ? (
+              <>
+                <ListItem disablePadding>
+                  <ListItemButton component={Link} to="/signin">
+                    <ListItemText primary="Sign In" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton component={Link} to="/newauth">
+                    <ListItemText primary="Register" />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={handleLanguageChange}
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    <TranslateIcon
+                      sx={{ [language === "ar" ? "ml" : "mr"]: 2 }}
+                    />
+                    <ListItemText
+                      primary={language === "ar" ? "English" : "العربية"}
+                    />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={toggleTheme}
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    {isDarkMode ? (
+                      <LightModeIcon
+                        sx={{ [language === "ar" ? "ml" : "mr"]: 2 }}
+                      />
+                    ) : (
+                      <DarkModeIcon
+                        sx={{ [language === "ar" ? "ml" : "mr"]: 2 }}
+                      />
+                    )}
+                    <ListItemText
+                      primary={isDarkMode ? "Light Mode" : "Dark Mode"}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </>
+            ) : (
+              <>
+                <ListItem disablePadding>
+                  <ListItemButton component={Link} to="/">
+                    <ListItemText primary={t("Allproducts")} />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton component={Link} to="/addProduct">
+                    <ListItemText primary={t("addProduct")} />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton component={Link} to="/cart">
+                    <ListItemText primary={t("cart")} />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton component={Link} to="/profile">
+                    <ListItemText primary={t("profile")} />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    component={Link}
+                    to="/message"
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    <Badge
+                      color="error"
+                      variant={unreadCount > 0 ? "dot" : "standard"}
+                    >
+                      <MailIcon sx={{ [language === "ar" ? "ml" : "mr"]: 2 }} />
+                    </Badge>
+                    <ListItemText primary={t("messages")} />
+                  </ListItemButton>
+                </ListItem>
+                <ListItem disablePadding>
+                  <ListItemButton
+                    onClick={handleMenuOpen}
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    <SettingsIcon
+                      sx={{ [language === "ar" ? "ml" : "mr"]: 2 }}
+                    />
+                    <ListItemText primary={t("settings")} />
+                  </ListItemButton>
+                </ListItem>
+              </>
+            )}
+          </List>
+        </Box>
+      </Drawer>
     </>
   );
 }

@@ -56,8 +56,7 @@ function App() {
     }
   });
 
-  // ✅ التحقق من session عند بداية التطبيق
-  useEffect(() => {
+   useEffect(() => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);
@@ -75,7 +74,7 @@ function App() {
     };
   }, []);
 
-  if (loading) return null; // أو Spinner لو حابب
+  if (loading) return null;  
 
   const routers = createBrowserRouter([
     {
