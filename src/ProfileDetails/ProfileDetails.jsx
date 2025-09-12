@@ -30,160 +30,173 @@ export default function ProfileDetails() {
   const isArabic = i18n.language === "ar";
   const [sidebarOpen, setSidebarOpen] = useState(false);
 const [selectedImage, setSelectedImage] = useState(null);
-  useEffect(() => {
-    const fetchData = async () => {
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", id)
-        .single();
 
-      const { data: userProducts } = await supabase
-        .from("products")
-        .select("*")
-        .eq("owner_id", id);
+// Set the page title to "Profile Details" when the component mounts
+useEffect(() => {
+  document.title = t('profiledetails');
+}, []);
 
-      setProfile(profileData);
-      setProducts(userProducts || []);
-      setLoading(false);
-    };
-
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) setCurrentUserId(user.id);
-    };
-
-    fetchData();
-    fetchUser();
-  }, [id]);
-
-  useEffect(() => {
-    const fetchComments = async () => {
-      if (!selectedProduct) return;
-      const { data, error } = await supabase
-        .from("comments")
-        .select(
-          `
-          id,
-          content,
-          created_at,
-          user_id,
-          profiles (
-            id,
-            full_name,
-            avatar_url
-          )
-        `
-        )
-        .eq("product_id", selectedProduct.id)
-        .order("created_at", { ascending: false });
-
-      if (!error) setComments(data || []);
-    };
-
-    fetchComments();
-  }, [selectedProduct]);
-
-  const handleAddComment = async () => {
-    if (!commentText.trim()) return;
-    setSending(true);
-
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    if (authError || !user) {
-      setSending(false);
-      return;
-    }
-
-    const { error } = await supabase.from("comments").insert({
-      content: commentText.trim(),
-      product_id: selectedProduct.id,
-      user_id: user.id,
-    });
-
-    if (!error) {
-      setCommentText("");
-      const { data } = await supabase
-        .from("comments")
-        .select(
-          `
-          id,
-          content,
-          created_at,
-          user_id,
-          profiles (
-            id,
-            full_name,
-            avatar_url
-          )
-        `
-        )
-        .eq("product_id", selectedProduct.id)
-        .order("created_at", { ascending: false });
-
-      setComments(data || []);
-    }
-
-    setSending(false);
-  };
-
-  const handleDeleteComment = async (commentId) => {
-    await supabase.from("comments").delete().eq("id", commentId);
-    setComments((prev) => prev.filter((c) => c.id !== commentId));
-  };
-
-  const handleNavigateToChat = () => {
-    navigate(`/message/${profile.id}`, {
-      state: {
-        product: {
-          name: selectedProduct.name,
-          image_url: selectedProduct.image_url,
-          price: selectedProduct.price,
-          description: selectedProduct.description,
-          address: selectedProduct.address,
-        },
-      },
-    });
-  };
-  const handleAddToCart = async (product) => {
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
-    if (error || !user) {
-      toast.error("يجب تسجيل الدخول أولاً");
-      return;
-    }
-
-    const { data: existing } = await supabase
-      .from("cart_items")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("product_id", product.id)
+// Fetch profile data and products for the given user ID, and also fetch the current logged-in user
+useEffect(() => {
+  const fetchData = async () => {
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", id)
       .single();
 
-    if (existing) {
-      toast(t("Theproductisalreadyinthecart"));
-      return;
-    }
+    const { data: userProducts } = await supabase
+      .from("products")
+      .select("*")
+      .eq("owner_id", id);
 
-    const { error: insertError } = await supabase.from("cart_items").insert({
-      user_id: user.id,
-      product_id: product.id,
-      quantity: 1,
-    });
-
-    if (insertError) {
-      toast.error(t("Anerroroccurredwhileadding"));
-    } else {
-      toast.success(t("Theproducthasbeenaddedtothecart"));
-      setAddedToCartIds((prev) => [...prev, product.id]);
-    }
+    setProfile(profileData);
+    setProducts(userProducts || []);
+    setLoading(false);
   };
+
+  const fetchUser = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) setCurrentUserId(user.id);
+  };
+
+  fetchData();
+  fetchUser();
+}, [id]);
+
+// Fetch comments for the currently selected product
+useEffect(() => {
+  const fetchComments = async () => {
+    if (!selectedProduct) return;
+    const { data, error } = await supabase
+      .from("comments")
+      .select(
+        `
+        id,
+        content,
+        created_at,
+        user_id,
+        profiles (
+          id,
+          full_name,
+          avatar_url
+        )
+      `
+      )
+      .eq("product_id", selectedProduct.id)
+      .order("created_at", { ascending: false });
+
+    if (!error) setComments(data || []);
+  };
+
+  fetchComments();
+}, [selectedProduct]);
+
+// Add a new comment to the selected product
+const handleAddComment = async () => {
+  if (!commentText.trim()) return;
+  setSending(true);
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+  if (authError || !user) {
+    setSending(false);
+    return;
+  }
+
+  const { error } = await supabase.from("comments").insert({
+    content: commentText.trim(),
+    product_id: selectedProduct.id,
+    user_id: user.id,
+  });
+
+  if (!error) {
+    setCommentText("");
+    const { data } = await supabase
+      .from("comments")
+      .select(
+        `
+        id,
+        content,
+        created_at,
+        user_id,
+        profiles (
+          id,
+          full_name,
+          avatar_url
+        )
+      `
+      )
+      .eq("product_id", selectedProduct.id)
+      .order("created_at", { ascending: false });
+
+    setComments(data || []);
+  }
+
+  setSending(false);
+};
+
+// Delete a comment by its ID and update the local comments state
+const handleDeleteComment = async (commentId) => {
+  await supabase.from("comments").delete().eq("id", commentId);
+  setComments((prev) => prev.filter((c) => c.id !== commentId));
+};
+
+// Navigate to the chat page with the product details passed in state
+const handleNavigateToChat = () => {
+  navigate(`/message/${profile.id}`, {
+    state: {
+      product: {
+        name: selectedProduct.name,
+        image_url: selectedProduct.image_url,
+        price: selectedProduct.price,
+        description: selectedProduct.description,
+        address: selectedProduct.address,
+      },
+    },
+  });
+};
+
+// Add a product to the user's cart, checking for duplicates first
+const handleAddToCart = async (product) => {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+  if (error || !user) {
+    toast.error("يجب تسجيل الدخول أولاً");
+    return;
+  }
+
+  const { data: existing } = await supabase
+    .from("cart_items")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("product_id", product.id)
+    .single();
+
+  if (existing) {
+    toast(t("Theproductisalreadyinthecart"));
+    return;
+  }
+
+  const { error: insertError } = await supabase.from("cart_items").insert({
+    user_id: user.id,
+    product_id: product.id,
+    quantity: 1,
+  });
+
+  if (insertError) {
+    toast.error(t("Anerroroccurredwhileadding"));
+  } else {
+    toast.success(t("Theproducthasbeenaddedtothecart"));
+    setAddedToCartIds((prev) => [...prev, product.id]);
+  }
+};
 
   if (loading) {
     return (

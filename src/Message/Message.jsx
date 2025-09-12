@@ -25,215 +25,232 @@ export default function Message() {
   const [currentUser, setCurrentUser] = useState(null);
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [productImageVisible, setProductImageVisible] = useState(true);
+// Set the page title to "Messages" when the component mounts
+useEffect(() => {
+  document.title = t('messages');
+}, []);
 
-  useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setCurrentUser(user);
-    };
-    getUser();
-  }, []);
+// Fetch the current authenticated user and store it in state
+useEffect(() => {
+  const getUser = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    setCurrentUser(user);
+  };
+  getUser();
+}, []);
 
-  useEffect(() => {
-    if (product) {
-      const initialMessage = ` المنتج :  ${product.name}
+// If a product is passed, prefill the message input with product details
+useEffect(() => {
+  if (product) {
+    const initialMessage = ` المنتج :  ${product.name}
  السعر  :   ${product.price} جنيه 
  الوصف  :   ${
-   product.description?.trim() ? product.description : "لا يوجد وصف"
- }`;
-      setNewMessage(initialMessage);
-    }
-  }, [product]);
-  const markMessagesAsRead = async () => {
-    const { data, error } = await supabase
-      .from("messages")
-      .update({ is_read: true })
-      .eq("receiver_id", currentUser.id)
-      .eq("is_read", false);
+      product.description?.trim() ? product.description : "لا يوجد وصف"
+    }`;
+    setNewMessage(initialMessage);
+  }
+}, [product]);
 
+// Mark all unread messages for the current user as read and update unread count in localStorage
+const markMessagesAsRead = async () => {
+  const { data, error } = await supabase
+    .from("messages")
+    .update({ is_read: true })
+    .eq("receiver_id", currentUser.id)
+    .eq("is_read", false);
+
+  const { count } = await supabase
+    .from("messages")
+    .select("*", { count: "exact", head: true })
+    .eq("receiver_id", currentUser.id)
+    .eq("is_read", false);
+
+  localStorage.setItem("forceUnreadCount", count || 0);
+};
+
+// Fetch all messages exchanged between the current user and the selected contact
+const fetchMessages = async () => {
+  if (!otherUserId || !currentUser) return;
+
+  const { data, error } = await supabase
+    .from("messages")
+    .select("*")
+    .or(
+      `and(sender_id.eq.${currentUser.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${currentUser.id})`
+    )
+    .order("created_at", { ascending: true });
+
+  if (!error) {
+    setMessages(data);
+  }
+};
+
+// Fetch all contacts the current user has messaged or received messages from
+const fetchContacts = async () => {
+  if (!currentUser) return;
+
+  const { data: sentMessages } = await supabase
+    .from("messages")
+    .select("id, message, created_at, receiver_id")
+    .eq("sender_id", currentUser.id);
+
+  const { data: receivedMessages } = await supabase
+    .from("messages")
+    .select("id, message, created_at, sender_id, is_read")
+    .eq("receiver_id", currentUser.id);
+
+  const userIds = new Set();
+
+  sentMessages?.forEach((msg) => {
+    if (msg.receiver_id && msg.receiver_id !== currentUser.id) {
+      userIds.add(msg.receiver_id);
+    }
+  });
+
+  receivedMessages?.forEach((msg) => {
+    if (msg.sender_id && msg.sender_id !== currentUser.id) {
+      userIds.add(msg.sender_id);
+    }
+  });
+
+  const { data: users } = await supabase
+    .from("profiles")
+    .select("id, full_name, avatar_url")
+    .in("id", Array.from(userIds));
+
+  const userMap = {};
+
+  users.forEach((user) => {
+    const lastSent = sentMessages
+      ?.filter((m) => m.receiver_id === user.id)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+    const lastReceived = receivedMessages
+      ?.filter((m) => m.sender_id === user.id)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
+    const lastMessage = lastSent || lastReceived;
+
+    const unreadCount = receivedMessages?.filter(
+      (m) => m.sender_id === user.id && !m.is_read
+    ).length;
+
+    userMap[user.id] = {
+      ...user,
+      lastMessage: lastMessage?.message || "",
+      lastTime: lastMessage?.created_at || "",
+      unreadCount,
+    };
+  });
+
+  const sortedContacts = Object.values(userMap).sort(
+    (a, b) => new Date(b.lastTime) - new Date(a.lastTime)
+  );
+  setContacts(sortedContacts);
+};
+
+// Fetch contacts once the current user is available
+useEffect(() => {
+  if (currentUser) {
+    fetchContacts();
+  }
+}, [currentUser]);
+
+// If no contact is selected, automatically navigate to the most recent one
+useEffect(() => {
+  if (!otherUserId && contacts.length > 0) {
+    navigate(`/message/${contacts[0].id}`, { replace: true });
+  }
+}, [contacts, otherUserId]);
+
+// Load messages and contacts, and mark messages as read when both users are available
+useEffect(() => {
+  if (!currentUser || !otherUserId) return;
+
+  const loadMessages = async () => {
+    // 1. Mark messages as read
+    await markMessagesAsRead(otherUserId);
+
+    // 2. Wait briefly for Supabase to update
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    // 3. Get updated unread count
     const { count } = await supabase
       .from("messages")
       .select("*", { count: "exact", head: true })
       .eq("receiver_id", currentUser.id)
       .eq("is_read", false);
 
+    // 4. Store unread count in localStorage
     localStorage.setItem("forceUnreadCount", count || 0);
+
+    // 5. Fetch messages and contacts
+    await fetchMessages();
+    await fetchContacts();
   };
 
-  const fetchMessages = async () => {
-    if (!otherUserId || !currentUser) return;
+  loadMessages();
+}, [currentUser, otherUserId]);
 
-    const { data, error } = await supabase
-      .from("messages")
-      .select("*")
-      .or(
-        `and(sender_id.eq.${currentUser.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${currentUser.id})`
-      )
-      .order("created_at", { ascending: true });
+// Subscribe to real-time message updates using Supabase channel
+useEffect(() => {
+  if (!currentUser) return;
 
-    if (!error) {
-      setMessages(data);
-    }
-  };
-
-  const fetchContacts = async () => {
-    if (!currentUser) return;
-
-    const { data: sentMessages } = await supabase
-      .from("messages")
-      .select("id, message, created_at, receiver_id")
-      .eq("sender_id", currentUser.id);
-
-    const { data: receivedMessages } = await supabase
-      .from("messages")
-      .select("id, message, created_at, sender_id, is_read")
-      .eq("receiver_id", currentUser.id);
-
-    const userIds = new Set();
-
-    sentMessages?.forEach((msg) => {
-      if (msg.receiver_id && msg.receiver_id !== currentUser.id) {
-        userIds.add(msg.receiver_id);
-      }
-    });
-
-    receivedMessages?.forEach((msg) => {
-      if (msg.sender_id && msg.sender_id !== currentUser.id) {
-        userIds.add(msg.sender_id);
-      }
-    });
-
-    const { data: users } = await supabase
-      .from("profiles")
-      .select("id, full_name, avatar_url")
-      .in("id", Array.from(userIds));
-
-    const userMap = {};
-
-    users.forEach((user) => {
-      const lastSent = sentMessages
-        ?.filter((m) => m.receiver_id === user.id)
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
-      const lastReceived = receivedMessages
-        ?.filter((m) => m.sender_id === user.id)
-        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))[0];
-      const lastMessage = lastSent || lastReceived;
-
-      const unreadCount = receivedMessages?.filter(
-        (m) => m.sender_id === user.id && !m.is_read
-      ).length;
-
-      userMap[user.id] = {
-        ...user,
-        lastMessage: lastMessage?.message || "",
-        lastTime: lastMessage?.created_at || "",
-        unreadCount,
-      };
-    });
-
-    const sortedContacts = Object.values(userMap).sort(
-      (a, b) => new Date(b.lastTime) - new Date(a.lastTime)
-    );
-    setContacts(sortedContacts);
-  };
-
-  useEffect(() => {
-    if (currentUser) {
-      fetchContacts();
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
-    if (!otherUserId && contacts.length > 0) {
-      navigate(`/message/${contacts[0].id}`, { replace: true });
-    }
-  }, [contacts, otherUserId]);
-  useEffect(() => {
-    if (!currentUser || !otherUserId) return;
-
-    const loadMessages = async () => {
-      // 1. Teach the letters that they have been read
-      await markMessagesAsRead(otherUserId);
-
-      // 2. Wait a while for Supabase to finish updating.
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // 3.Count unread messages from Supabase
-      const { count } = await supabase
-        .from("messages")
-        .select("*", { count: "exact", head: true })
-        .eq("receiver_id", currentUser.id)
-        .eq("is_read", false);
-
-      // 4. Store the number in localStorage for Navbar to read.
-      localStorage.setItem("forceUnreadCount", count || 0);
-
-      // 5. Complete downloading messages and users.
-      await fetchMessages();
-      await fetchContacts();
-    };
-
-    loadMessages();
-  }, [currentUser, otherUserId]);
-  useEffect(() => {
-    if (!currentUser) return;
-
-    const channel = supabase
-      .channel("live-chat")
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-        },
-        (payload) => {
-          const msg = payload.new;
-          if (
-            (msg.sender_id === currentUser.id &&
-              msg.receiver_id === otherUserId) ||
-            (msg.sender_id === otherUserId &&
-              msg.receiver_id === currentUser.id)
-          ) {
-            setMessages((prev) => [...prev, msg]);
-          }
+  const channel = supabase
+    .channel("live-chat")
+    .on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+      },
+      (payload) => {
+        const msg = payload.new;
+        if (
+          (msg.sender_id === currentUser.id &&
+            msg.receiver_id === otherUserId) ||
+          (msg.sender_id === otherUserId &&
+            msg.receiver_id === currentUser.id)
+        ) {
+          setMessages((prev) => [...prev, msg]);
         }
-      )
-      .subscribe();
+      }
+    )
+    .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [currentUser, otherUserId]);
-
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !otherUserId) return;
-
-    let finalMessage = newMessage;
-
-    if (product?.image_url && productImageVisible) {
-      finalMessage += `\n صورة المنتج:\n${product.image_url}`;
-    }
-
-    const { data, error } = await supabase
-      .from("messages")
-      .insert({
-        sender_id: currentUser.id,
-        receiver_id: otherUserId,
-        message: finalMessage,
-        is_read: false,
-      })
-      .select();
-
-    if (!error && data && data.length > 0) {
-      setMessages((prev) => [...prev, data[0]]);
-    }
-
-    setNewMessage("");
-    setProductImageVisible(false);
+  return () => {
+    supabase.removeChannel(channel);
   };
+}, [currentUser, otherUserId]);
+
+// Send a new message, optionally including product image if visible
+const sendMessage = async () => {
+  if (!newMessage.trim() || !otherUserId) return;
+
+  let finalMessage = newMessage;
+
+  if (product?.image_url && productImageVisible) {
+    finalMessage += `\n صورة المنتج:\n${product.image_url}`;
+  }
+
+  const { data, error } = await supabase
+    .from("messages")
+    .insert({
+      sender_id: currentUser.id,
+      receiver_id: otherUserId,
+      message: finalMessage,
+      is_read: false,
+    })
+    .select();
+
+  if (!error && data && data.length > 0) {
+    setMessages((prev) => [...prev, data[0]]);
+  }
+
+  setNewMessage("");
+  setProductImageVisible(false);
+};
 
   return (
     <Box

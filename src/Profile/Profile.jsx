@@ -33,291 +33,309 @@ export default function Profile() {
   const [currentUserId, setCurrentUserId] = useState(null);
   const navigate = useNavigate();
 const [selectedImage, setSelectedImage] = useState(null);
-   useEffect(() => {
-    const fetchUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) setCurrentUserId(user.id);
-    };
-    fetchUser();
-  }, []);
 
-  const handleDeleteComment = async (commentId) => {
-    const { error } = await supabase
-      .from("comments")
-      .delete()
-      .eq("id", commentId);
 
-    if (!error) {
-      setComments((prev) => prev.filter((c) => c.id !== commentId));
-    } else {
-      console.error("خطأ في حذف التعليق:", error);
-    }
-  };
+// Set the page title to "Profile" when the component mounts
+useEffect(() => {
+  document.title = t('profile');
+}, []);
 
-  useEffect(() => {
-    const fetchCommentsForAll = async () => {
-      const { data, error } = await supabase.from("comments").select(`
-        id,
-        content,
-        created_at,
-        product_id,
-        user_id,
-        profiles (
-          full_name,
-          avatar_url
-        )
-      `);
-
-      if (!error && data) {
-        const grouped = data.reduce((acc, comment) => {
-          acc[comment.product_id] = acc[comment.product_id] || [];
-          acc[comment.product_id].push(comment);
-          return acc;
-        }, {});
-        setCommentsMap(grouped);
-      }
-    };
-
-    fetchCommentsForAll();
-  }, [products]);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return navigate("/signin");
-
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-
-      const { data: userProducts } = await supabase
-        .from("products")
-        .select("*")
-        .eq("owner_id", user.id);
-
-      setProfile(profileData);
-      setProducts(userProducts || []);
-      setLoading(false);
-    };
-
-    fetchData();
-  }, [navigate]);
-
-  useEffect(() => {
-    if (tabIndex === 1 && profile) {
-      setEditData({
-        full_name: profile.full_name || "",
-        phone: profile.phone || "",
-        address: profile.address || "",
-        avatar_url: profile.avatar_url || "",
-      });
-      setAvatarPreview(profile.avatar_url || null);
-    }
-  }, [tabIndex, profile]);
-
-  const handleTabChange = (e, newValue) => {
-    setTabIndex(newValue);
-  };
-
-  const handleSaveEdit = async () => {
-    if (!editData.full_name || !editData.phone || !editData.address) {
-      toast.error(t("Allfieldsarerequired"));
-      return;
-    }
-
-    let avatarUrl = editData.avatar_url;
-
-    if (avatarFile) {
-      const ext = avatarFile.name.split(".").pop();
-      const fileName = `${profile.id}.${ext}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(fileName, avatarFile, { upsert: true });
-
-      if (!uploadError) {
-        const { data: publicUrlData } = supabase.storage
-          .from("avatars")
-          .getPublicUrl(fileName);
-
-        avatarUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
-      }
-    }
-
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        full_name: editData.full_name,
-        phone: editData.phone,
-        address: editData.address,
-        avatar_url: avatarUrl,
-      })
-      .eq("id", profile.id);
-
-    if (!error) {
-      setProfile((prev) => ({
-        ...prev,
-        ...editData,
-        avatar_url: avatarUrl,
-      }));
-      toast.success(t("Yourdatahasbeenmodifiedsuccessfully"));
-    } else {
-      toast.error(t("Datamodificationfailed"));
-    }
-  };
-
-  const handleAddComment = async () => {
-    if (!commentText.trim() || !commentsModalProduct) return;
-
+// Fetch the current authenticated user's ID
+useEffect(() => {
+  const fetchUser = async () => {
     const {
       data: { user },
-      error: userError,
     } = await supabase.auth.getUser();
-    if (userError || !user) {
-      console.log("خطأ في جلب المستخدم:", userError);
-      return;
-    }
+    if (user) setCurrentUserId(user.id);
+  };
+  fetchUser();
+}, []);
 
-    const { error: insertError } = await supabase.from("comments").insert({
-      content: commentText.trim(),
-      product_id: commentsModalProduct.id,
-      user_id: user.id,
-    });
+// Delete a comment by its ID and update the local comments state
+const handleDeleteComment = async (commentId) => {
+  const { error } = await supabase
+    .from("comments")
+    .delete()
+    .eq("id", commentId);
 
-    if (insertError) {
-      console.log("خطأ في إضافة التعليق:", insertError);
-      return;
-    }
+  if (!error) {
+    setComments((prev) => prev.filter((c) => c.id !== commentId));
+  } else {
+    console.error("خطأ في حذف التعليق:", error);
+  }
+};
 
-    const { data: updatedComments, error: fetchError } = await supabase
-      .from("comments")
-      .select(
-        `
+// Fetch all comments and group them by product ID
+useEffect(() => {
+  const fetchCommentsForAll = async () => {
+    const { data, error } = await supabase.from("comments").select(`
       id,
       content,
       created_at,
+      product_id,
       user_id,
       profiles (
         full_name,
         avatar_url
       )
-    `
-      )
-      .eq("product_id", commentsModalProduct.id)
-      .order("created_at", { ascending: false });
+    `);
 
-    if (fetchError) {
-      console.log("خطأ في تحميل التعليقات:", fetchError);
-      return;
+    if (!error && data) {
+      const grouped = data.reduce((acc, comment) => {
+        acc[comment.product_id] = acc[comment.product_id] || [];
+        acc[comment.product_id].push(comment);
+        return acc;
+      }, {});
+      setCommentsMap(grouped);
     }
-
-    setComments(updatedComments || []);
-    setCommentText("");
   };
 
-  const openEditModalFromProduct = (product) => {
-    setSelectedProduct(product);
-    setEditValues({
-      name: product.name,
-      description: product.description,
-      price: product.price.toString(),
-    });
-    setNewImageFile(null);
-    setNewImagePreview(null);
-  };
+  fetchCommentsForAll();
+}, [products]);
 
-  const handleSaveProductEdit = async () => {
-    let imageUrl = selectedProduct.image_url;
+// Fetch profile data and products for the current user
+useEffect(() => {
+  const fetchData = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return navigate("/signin");
 
-    if (newImageFile) {
-      const ext = newImageFile.name.split(".").pop();
-      const fileName = `${selectedProduct.id}-${Date.now()}.${ext}`;
+    const { data: profileData } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-      const { error: uploadError } = await supabase.storage
-        .from("product-images")
-        .upload(fileName, newImageFile, {
-          cacheControl: "3600",
-          upsert: true,
-          contentType: newImageFile.type,
-        });
-
-      if (!uploadError) {
-        const { data: publicUrlData } = supabase.storage
-          .from("product-images")
-          .getPublicUrl(fileName);
-
-        imageUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
-      }
-    }
-
-    const { error } = await supabase
+    const { data: userProducts } = await supabase
       .from("products")
-      .update({
-        name: editValues.name,
-        description: editValues.description,
-        price: parseFloat(editValues.price),
-        image_url: imageUrl,
-      })
-      .eq("id", selectedProduct.id);
+      .select("*")
+      .eq("owner_id", user.id);
 
-    if (!error) {
-      toast.success(t("Theproducthasbeenmodifiedsuccessfully"));
-      setSelectedProduct(null);
-      const updated = products.map((p) =>
-        p.id === selectedProduct.id
-          ? {
-              ...p,
-              ...editValues,
-              price: parseFloat(editValues.price),
-              image_url: imageUrl,
-            }
-          : p
-      );
-      setProducts(updated);
-    } else {
-      toast.error(t("Productmodificationailed"));
+    setProfile(profileData);
+    setProducts(userProducts || []);
+    setLoading(false);
+  };
+
+  fetchData();
+}, [navigate]);
+
+// When switching to the edit tab, populate the edit form with profile data
+useEffect(() => {
+  if (tabIndex === 1 && profile) {
+    setEditData({
+      full_name: profile.full_name || "",
+      phone: profile.phone || "",
+      address: profile.address || "",
+      avatar_url: profile.avatar_url || "",
+    });
+    setAvatarPreview(profile.avatar_url || null);
+  }
+}, [tabIndex, profile]);
+
+// Handle tab change in the profile view
+const handleTabChange = (e, newValue) => {
+  setTabIndex(newValue);
+};
+
+// Save edited profile data, including optional avatar upload
+const handleSaveEdit = async () => {
+  if (!editData.full_name || !editData.phone || !editData.address) {
+    toast.error(t("Allfieldsarerequired"));
+    return;
+  }
+
+  let avatarUrl = editData.avatar_url;
+
+  if (avatarFile) {
+    const ext = avatarFile.name.split(".").pop();
+    const fileName = `${profile.id}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(fileName, avatarFile, { upsert: true });
+
+    if (!uploadError) {
+      const { data: publicUrlData } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(fileName);
+
+      avatarUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
     }
-  };
+  }
 
-  const openCommentsModal = async (product) => {
-    setCommentsModalProduct(product);
-    const { data, error } = await supabase
-      .from("comments")
-      .select(
-        `
-      id,
-      content,
-      created_at,
-      user_id,
-      profiles (
-        full_name,
-        avatar_url
-      )
-    `
-      )
-      .eq("product_id", product.id)
-      .order("created_at", { ascending: false });
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      full_name: editData.full_name,
+      phone: editData.phone,
+      address: editData.address,
+      avatar_url: avatarUrl,
+    })
+    .eq("id", profile.id);
 
-    if (!error) setComments(data || []);
-  };
+  if (!error) {
+    setProfile((prev) => ({
+      ...prev,
+      ...editData,
+      avatar_url: avatarUrl,
+    }));
+    toast.success(t("Yourdatahasbeenmodifiedsuccessfully"));
+  } else {
+    toast.error(t("Datamodificationfailed"));
+  }
+};
 
-  const handleDelete = async (id) => {
-    const { error } = await supabase.from("products").delete().eq("id", id);
+// Add a new comment to the selected product in the modal
+const handleAddComment = async () => {
+  if (!commentText.trim() || !commentsModalProduct) return;
 
-    if (!error) {
-      toast.success(t("Theproducthasbeensuccessfullydeleted"));
-      setProducts((prev) => prev.filter((p) => p.id !== id));
-    } else {
-      toast.error("فشل حذف المنتج");
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+  if (userError || !user) {
+    console.log("خطأ في جلب المستخدم:", userError);
+    return;
+  }
+
+  const { error: insertError } = await supabase.from("comments").insert({
+    content: commentText.trim(),
+    product_id: commentsModalProduct.id,
+    user_id: user.id,
+  });
+
+  if (insertError) {
+    console.log("خطأ في إضافة التعليق:", insertError);
+    return;
+  }
+
+  const { data: updatedComments, error: fetchError } = await supabase
+    .from("comments")
+    .select(
+      `
+    id,
+    content,
+    created_at,
+    user_id,
+    profiles (
+      full_name,
+      avatar_url
+    )
+  `
+    )
+    .eq("product_id", commentsModalProduct.id)
+    .order("created_at", { ascending: false });
+
+  if (fetchError) {
+    console.log("خطأ في تحميل التعليقات:", fetchError);
+    return;
+  }
+
+  setComments(updatedComments || []);
+  setCommentText("");
+};
+
+// Open the product edit modal and populate it with existing product data
+const openEditModalFromProduct = (product) => {
+  setSelectedProduct(product);
+  setEditValues({
+    name: product.name,
+    description: product.description,
+    price: product.price.toString(),
+  });
+  setNewImageFile(null);
+  setNewImagePreview(null);
+};
+
+// Save edited product data, including optional image upload
+const handleSaveProductEdit = async () => {
+  let imageUrl = selectedProduct.image_url;
+
+  if (newImageFile) {
+    const ext = newImageFile.name.split(".").pop();
+    const fileName = `${selectedProduct.id}-${Date.now()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from("product-images")
+      .upload(fileName, newImageFile, {
+        cacheControl: "3600",
+        upsert: true,
+        contentType: newImageFile.type,
+      });
+
+    if (!uploadError) {
+      const { data: publicUrlData } = supabase.storage
+        .from("product-images")
+        .getPublicUrl(fileName);
+
+      imageUrl = `${publicUrlData.publicUrl}?t=${Date.now()}`;
     }
-  };
+  }
 
+  const { error } = await supabase
+    .from("products")
+    .update({
+      name: editValues.name,
+      description: editValues.description,
+      price: parseFloat(editValues.price),
+      image_url: imageUrl,
+    })
+    .eq("id", selectedProduct.id);
+
+  if (!error) {
+    toast.success(t("Theproducthasbeenmodifiedsuccessfully"));
+    setSelectedProduct(null);
+    const updated = products.map((p) =>
+      p.id === selectedProduct.id
+        ? {
+            ...p,
+            ...editValues,
+            price: parseFloat(editValues.price),
+            image_url: imageUrl,
+          }
+        : p
+    );
+    setProducts(updated);
+  } else {
+    toast.error(t("Productmodificationailed"));
+  }
+};
+
+// Open the comments modal for a specific product and fetch its comments
+const openCommentsModal = async (product) => {
+  setCommentsModalProduct(product);
+  const { data, error } = await supabase
+    .from("comments")
+    .select(
+      `
+    id,
+    content,
+    created_at,
+    user_id,
+    profiles (
+      full_name,
+      avatar_url
+    )
+  `
+    )
+    .eq("product_id", product.id)
+    .order("created_at", { ascending: false });
+
+  if (!error) setComments(data || []);
+};
+
+// Delete a product by its ID and update the local products state
+const handleDelete = async (id) => {
+  const { error } = await supabase.from("products").delete().eq("id", id);
+
+  if (!error) {
+    toast.success(t("Theproducthasbeensuccessfullydeleted"));
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+  } else {
+    toast.error("فشل حذف المنتج");
+  }
+};
   if (loading)
     return (
       <Box textAlign="center" mt={5}>

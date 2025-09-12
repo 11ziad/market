@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
 import {Box, Typography, TextField, Button, CircularProgress,Avatar, Card, Divider,useTheme} from '@mui/material'
 import CloudUploadIcon from '@mui/icons-material/CloudUpload'
@@ -6,6 +6,7 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
   import { useTranslation } from 'react-i18next'
  import AddAPhotoIcon from '@mui/icons-material/AddAPhoto';
 import { toast } from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom'
 
 export default function AddProduct() {
   const { i18n } = useTranslation()
@@ -18,51 +19,64 @@ export default function AddProduct() {
   const [imageFile, setImageFile] = useState(null)
   const [description, setDescription] = useState('')
   const [imagePreview, setImagePreview] = useState(null)
+  const navigate =useNavigate()
 
+// Set the page title to "Add Product" when the component mounts
+useEffect(() => {
+  document.title = t('addProduct');
+}, []);
 
-  const handleImageChange = (e) => {
-  const file = e.target.files[0]
-  setImageFile(file)
-  if (file) setImagePreview(URL.createObjectURL(file))
-}
+// Handle image file selection and generate a preview URL
+const handleImageChange = (e) => {
+  const file = e.target.files[0];
+  setImageFile(file);
+  if (file) setImagePreview(URL.createObjectURL(file));
+};
 
+// Handle product submission: validate inputs, upload image, and insert product into database
 const handleAddProduct = async () => {
   if (!name.trim() || !price || !imageFile) {
-    toast.error(t('Productnamepriceandimagemustbeentered'))
-    return
+    toast.error(t('Productnamepriceandimagemustbeentered'));
+    return;
   }
-  setLoading(true)
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  setLoading(true);
+
+  // Get the current authenticated user
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   if (userError || !user) {
-    toast.error(t('Unabletogetcurrentuser'))
-    setLoading(false)
-    return
+    toast.error(t('Unabletogetcurrentuser'));
+    setLoading(false);
+    return;
   }
 
-  const fileExt = imageFile.name.split('.').pop()
-  const fileName = `${user.id}-${Date.now()}.${fileExt}`
+  // Prepare image file name using user ID and timestamp
+  const fileExt = imageFile.name.split('.').pop();
+  const fileName = `${user.id}-${Date.now()}.${fileExt}`;
 
+  // Upload image to Supabase storage
   const { error: uploadError } = await supabase.storage
     .from('product-images')
     .upload(fileName, imageFile, {
       cacheControl: '3600',
       upsert: true,
       contentType: imageFile.type
-    })
+    });
 
   if (uploadError) {
-    toast.error(uploadError.message || t('Failedtouploadimage'))
-    setLoading(false)
-    return
+    toast.error(uploadError.message || t('Failedtouploadimage'));
+    setLoading(false);
+    return;
   }
 
+  // Get public URL of the uploaded image
   const { data: publicUrlData } = supabase.storage
     .from('product-images')
-    .getPublicUrl(fileName)
+    .getPublicUrl(fileName);
 
-  const imageUrl = publicUrlData?.publicUrl || ''
+  const imageUrl = publicUrlData?.publicUrl || '';
 
+  // Insert new product into the database
   const { error: insertError } = await supabase
     .from('products')
     .insert({
@@ -71,21 +85,22 @@ const handleAddProduct = async () => {
       price: parseFloat(price),
       image_url: imageUrl,
       owner_id: user.id
-    })
+    });
 
   if (insertError) {
-    toast.error(insertError.message || t('Failedtoaddproduct'))
+    toast.error(insertError.message || t('Failedtoaddproduct'));
   } else {
-    toast.success(t('Theproducthasbeenaddedsuccessfully'))
-    setName('')
-    setDescription('')
-    setPrice('')
-    setImageFile(null)
-    setImagePreview(null)
+    toast.success(t('Theproducthasbeenaddedsuccessfully'));
+    navigate('/');
+    setName('');
+    setDescription('');
+    setPrice('');
+    setImageFile(null);
+    setImagePreview(null);
   }
 
-  setLoading(false)
-}
+  setLoading(false);
+};
   return (
     <Box maxWidth="1000px" mx="auto" mt={5}>
       <Card elevation={5} sx={{ borderRadius: 4, overflow: 'hidden', p: 3 }}>

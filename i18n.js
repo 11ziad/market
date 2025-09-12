@@ -116,12 +116,19 @@ i18n
           NewPassword:' كلمة المرور الجديدة ',
           Updatepassword:'تحديث كلمة المرور',
           Therearenoproductsinthecart:'لا توجد منتجات في السلة',
-
+          allProduct:'جميع المنتجات',
+          newaccount:'حساب جديد',
+          profiledetails:'حساب المستخدم',
+          Tocommunicatewiththeprogrammer:' للتواصل مع المبرمج',
            }
       },
       en: {
         translation: {
+          profiledetails :'Profile User',
+          Tocommunicatewiththeprogrammer:'To communicate with the programmer',
           welcome: 'Welcome',
+          newaccount:'New Account',
+          allProduct:'All Product',
           addProduct: 'Add Product',
           editProfile: 'Edit Profile',
           comments: 'Comments',

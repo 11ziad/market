@@ -26,20 +26,27 @@ export default function Cart() {
   const [selectedProductForComments, setSelectedProductForComments] =
     useState(null);
 const [selectedImage, setSelectedImage] = useState(null);
-  useEffect(() => {
-    const fetchUserAndCart = async () => {
-      const {
-        data: { user },
-        error: authError,
-      } = await supabase.auth.getUser();
-      if (authError || !user) return;
 
-      setCurrentUserId(user.id);
+// Set the page title to "Cart" when the component mounts
+useEffect(() => {
+  document.title = t('cart');
+}, []);
 
-      const { data, error } = await supabase
-        .from("cart_items")
-        .select(
-          `
+// Fetch the current user and their cart items from the database
+useEffect(() => {
+  const fetchUserAndCart = async () => {
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+    if (authError || !user) return;
+
+    setCurrentUserId(user.id);
+
+    const { data, error } = await supabase
+      .from("cart_items")
+      .select(
+        `
         id,
         product_id,
         added_at,
@@ -57,31 +64,33 @@ const [selectedImage, setSelectedImage] = useState(null);
           )
         )
       `
-        )
-        .eq("user_id", user.id)
-        .order("added_at", { ascending: false });
+      )
+      .eq("user_id", user.id)
+      .order("added_at", { ascending: false });
 
-      if (!error) setCartItems(data || []);
-      setLoading(false);
-    };
-
-    fetchUserAndCart();
-  }, []);
-
-  const handleRemoveFromCart = async (itemId) => {
-    await supabase.from("cart_items").delete().eq("id", itemId);
-    setCartItems((prev) => prev.filter((item) => item.id !== itemId));
-    toast.success(t("Theproducthasbeenremovedfromthecart"));
+    if (!error) setCartItems(data || []);
+    setLoading(false);
   };
 
-  const openCommentsModal = async (product) => {
-    setSelectedProductForComments(product);
+  fetchUserAndCart();
+}, []);
 
-    if (!commentsMap[product.id]) {
-      const { data, error } = await supabase
-        .from("comments")
-        .select(
-          `
+// Remove a product from the user's cart
+const handleRemoveFromCart = async (itemId) => {
+  await supabase.from("cart_items").delete().eq("id", itemId);
+  setCartItems((prev) => prev.filter((item) => item.id !== itemId));
+  toast.success(t("Theproducthasbeenremovedfromthecart"));
+};
+
+// Open the comments modal for a specific product and fetch its comments if not already loaded
+const openCommentsModal = async (product) => {
+  setSelectedProductForComments(product);
+
+  if (!commentsMap[product.id]) {
+    const { data, error } = await supabase
+      .from("comments")
+      .select(
+        `
         id,
         content,
         created_at,
@@ -92,35 +101,37 @@ const [selectedImage, setSelectedImage] = useState(null);
           avatar_url
         )
       `
-        )
-        .eq("product_id", product.id)
-        .order("created_at", { ascending: false });
-
-      if (!error) {
-        setCommentsMap((prev) => ({ ...prev, [product.id]: data || [] }));
-      }
-    }
-  };
-
-  const closeCommentsModal = () => {
-    setSelectedProductForComments(null);
-  };
-
-  const handleAddComment = async (productId) => {
-    const text = commentTextMap[productId]?.trim();
-    if (!text) return;
-
-    const { error } = await supabase.from("comments").insert({
-      content: text,
-      product_id: productId,
-      user_id: currentUserId,
-    });
+      )
+      .eq("product_id", product.id)
+      .order("created_at", { ascending: false });
 
     if (!error) {
-      const { data } = await supabase
-        .from("comments")
-        .select(
-          `
+      setCommentsMap((prev) => ({ ...prev, [product.id]: data || [] }));
+    }
+  }
+};
+
+// Close the comments modal
+const closeCommentsModal = () => {
+  setSelectedProductForComments(null);
+};
+
+// Add a new comment for a specific product
+const handleAddComment = async (productId) => {
+  const text = commentTextMap[productId]?.trim();
+  if (!text) return;
+
+  const { error } = await supabase.from("comments").insert({
+    content: text,
+    product_id: productId,
+    user_id: currentUserId,
+  });
+
+  if (!error) {
+    const { data } = await supabase
+      .from("comments")
+      .select(
+        `
         id,
         content,
         created_at,
@@ -131,23 +142,23 @@ const [selectedImage, setSelectedImage] = useState(null);
           avatar_url
         )
       `
-        )
-        .eq("product_id", productId)
-        .order("created_at", { ascending: false });
+      )
+      .eq("product_id", productId)
+      .order("created_at", { ascending: false });
 
-      setCommentsMap((prev) => ({ ...prev, [productId]: data || [] }));
-      setCommentTextMap((prev) => ({ ...prev, [productId]: "" }));
-      toast.success(t("Yourcommenthasbeenadded"));
-    }
-  };
+    setCommentsMap((prev) => ({ ...prev, [productId]: data || [] }));
+    setCommentTextMap((prev) => ({ ...prev, [productId]: "" }));
+    toast.success(t("Yourcommenthasbeenadded"));
+  }
+};
 
-  const handleDeleteComment = async (commentId, productId) => {
-    await supabase.from("comments").delete().eq("id", commentId);
-    const updated = commentsMap[productId]?.filter((c) => c.id !== commentId);
-    setCommentsMap((prev) => ({ ...prev, [productId]: updated }));
-    toast.success(t("Thecommenthasbeendeleted"));
-  };
-
+// Delete a comment by its ID and update the local comments map
+const handleDeleteComment = async (commentId, productId) => {
+  await supabase.from("comments").delete().eq("id", commentId);
+  const updated = commentsMap[productId]?.filter((c) => c.id !== commentId);
+  setCommentsMap((prev) => ({ ...prev, [productId]: updated }));
+  toast.success(t("Thecommenthasbeendeleted"));
+};
   if (loading)
     return (
       <Box textAlign="center" mt={5}>

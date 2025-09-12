@@ -17,70 +17,78 @@ export default function SignIn() {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+// Automatically hide error messages after 4 seconds
+useEffect(() => {
+  /// Hide error messages after 4 seconds (optional)
+  if (errorMsg) {
+    const t = setTimeout(() => setErrorMsg(""), 4000);
+    return () => clearTimeout(t);
+  }
+}, [errorMsg]);
 
-  useEffect(() => {
-    /// Hide error messages after 4 seconds (optional)
-    if (errorMsg) {
-      const t = setTimeout(() => setErrorMsg(""), 4000);
-      return () => clearTimeout(t);
-    }
-  }, [errorMsg]);
+// Automatically hide success messages after 3 seconds
+useEffect(() => {
+  if (successMsg) {
+    const t = setTimeout(() => setSuccessMsg(""), 3000);
+    return () => clearTimeout(t);
+  }
+}, [successMsg]);
 
-  useEffect(() => {
-    if (successMsg) {
-      const t = setTimeout(() => setSuccessMsg(""), 3000);
-      return () => clearTimeout(t);
-    }
-  }, [successMsg]);
+// Validate the sign-in form fields (email format and password presence)
+const validateForm = () => {
+  if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return t("Invalidemail");
+  if (!password) return t("Passwordrequired");
+  return null;
+};
 
-  const validateForm = () => {
-    if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) return t("Invalidemail");
-    if (!password) return t("Passwordrequired");
-    return null;
-  };
+// Handle user sign-in: validate form, authenticate, fetch profile, and redirect
+const handleSignIn = async () => {
+  const validationError = validateForm();
+  if (validationError) {
+    setErrorMsg(validationError);
+    return;
+  }
 
-  const handleSignIn = async () => {
-    const validationError = validateForm();
-    if (validationError) {
-      setErrorMsg(validationError);
-      return;
-    }
+  setLoading(true);
+  setErrorMsg("");
+  setSuccessMsg("");
 
-    setLoading(true);
-    setErrorMsg("");
-    setSuccessMsg("");
+  try {
+    // Attempt to sign in with email and password
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
 
-    try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) throw error;
+    // Retrieve the authenticated user
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("تعذر الحصول على بيانات المستخدم");
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("تعذر الحصول على بيانات المستخدم");
+    // Fetch user's profile data
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("full_name, avatar_url, phone")
+      .eq("id", user.id)
+      .single();
 
-      const { data: profileData, error: profileError } = await supabase
-        .from("profiles")
-        .select("full_name, avatar_url, phone")
-        .eq("id", user.id)
-        .single();
+    if (profileError) throw profileError;
 
-      if (profileError) throw profileError;
+    // Store profile data in localStorage
+    localStorage.setItem("profile", JSON.stringify(profileData));
 
-      localStorage.setItem("profile", JSON.stringify(profileData));
-
-      setSuccessMsg(t("Youhavebeenloggedinsuccessfully"));
-      setTimeout(() => navigate("/"), 1200);
-    } catch (err) {
-      setErrorMsg(err.message || "فشل تسجيل الدخول");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+    // Show success message and redirect to homepage
+    setSuccessMsg(t("Youhavebeenloggedinsuccessfully"));
+    setTimeout(() => navigate("/"), 1200);
+  } catch (err) {
+    // Handle any errors during sign-in
+    setErrorMsg(err.message || "فشل تسجيل الدخول");
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <Box
       component="section"

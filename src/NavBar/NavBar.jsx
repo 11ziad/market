@@ -1,6 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
-import {AppBar,Toolbar,Typography,Button,Box,Badge,IconButton,Tooltip,Menu,MenuItem,Drawer,List,ListItem,ListItemButton,ListItemText,} from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  Badge,
+  IconButton,
+  Tooltip,
+  Menu,
+  MenuItem,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+} from "@mui/material";
 import MailIcon from "@mui/icons-material/Mail";
 import TranslateIcon from "@mui/icons-material/Translate";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
@@ -11,16 +27,33 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@mui/material/styles";
+import ContactPhoneIcon from "@mui/icons-material/ContactPhone";
+import EmailIcon from "@mui/icons-material/Email";
+import CallIcon from '@mui/icons-material/Call';
+import Popover from "@mui/material/Popover";
 
 export default function Navbar({ toggleTheme, isDarkMode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [language, setLanguage] = useState(localStorage.getItem("preferredLanguage") || "ar");
+  const [language, setLanguage] = useState(
+    localStorage.getItem("preferredLanguage") || "ar"
+  );
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const theme = useTheme();
+  const [contactAnchorEl, setContactAnchorEl] = useState(null);
+
+  const handleContactOpen = (event) => {
+    setContactAnchorEl(event.currentTarget);
+  };
+
+  const handleContactClose = () => {
+    setContactAnchorEl(null);
+  };
+
+  const isContactOpen = Boolean(contactAnchorEl);
 
   useEffect(() => {
     i18n.changeLanguage(language);
@@ -122,11 +155,16 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
             px: { xs: 2, md: 4 },
           }}
         >
-          <Link to="/" style={{ textDecoration: "none", color: "#fff" }}>
-            <Typography variant="h6" sx={{ fontWeight: 700 }}>
-              🛍️ ZiadShop
-            </Typography>
-          </Link>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            <Link to="/" style={{ textDecoration: "none", color: "#fff" }}>
+              <Typography variant="h6" sx={{ fontWeight: 700 }}>
+                🛍️ ZiadShop
+              </Typography>
+            </Link>
+            <IconButton onClick={handleContactOpen} sx={{ color: "#fff" }}>
+              <CallIcon />
+            </IconButton>
+          </Box>
 
           {/* Desktop View */}
           <Box
@@ -225,6 +263,64 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
           </Box>
         </Toolbar>
       </AppBar>
+      <Popover
+        open={isContactOpen}
+        anchorEl={contactAnchorEl}
+        onClose={handleContactClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        PaperProps={{
+          sx: {
+            p: 2,
+            borderRadius: 2,
+            minWidth: 250,
+            bgcolor: theme.palette.background.paper,
+          },
+        }}
+      >
+        {/* Title */}
+        <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
+         {t(('Tocommunicatewiththeprogrammer'))}
+        </Typography>
+
+        {/* WhatsApp */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <ContactPhoneIcon color="primary" />
+          <Typography
+            variant="body1"
+            component="a"
+            href="https://wa.me/201280226462"
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{
+              textDecoration: "none",
+              color: "inherit",
+              "&:hover": { textDecoration: "underline" },
+            }}
+          >
+            01280226462
+          </Typography>
+        </Box>
+
+        {/* Email */}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <EmailIcon color="primary" />
+          <Typography
+            variant="body1"
+            component="a"
+            href="mailto:ziad.n.mostafa@gmail.com"
+            sx={{
+              textDecoration: "none",
+              color: "inherit",
+              "&:hover": { textDecoration: "underline" },
+            }}
+          >
+            ziad.n.mostafa@gmail.com
+          </Typography>
+        </Box>
+      </Popover>
 
       {/* Drawer for Mobile */}
       {/* Mobile View */}
@@ -239,16 +335,15 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
             width: 260,
             bgcolor: theme.palette.mode === "dark" ? "#1c1c1c" : "#fff",
             height: "100%",
-           
+
             transform: "none !important",
-            direction: "ltr",  
+            direction: "ltr",
             display: "flex",
             flexDirection: "column",
             px: 2,
           },
         }}
       >
-        
         <Box
           sx={{
             direction: language === "ar" ? "rtl" : "ltr",

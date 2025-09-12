@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
 import {Box,Button,TextField,Typography,Alert,CircularProgress,Paper,useTheme} from "@mui/material";
 import { NavLink } from "react-router-dom";
@@ -13,8 +13,7 @@ export default function NewPass() {
   const [successMsg, setSuccessMsg] = useState("");
   const { i18n } = useTranslation();
   const { t } = useTranslation();
-
-  
+ 
   const handleResetPassword = async () => {
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       setErrorMsg(t("Invalidemail"));
