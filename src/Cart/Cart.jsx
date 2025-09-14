@@ -11,6 +11,7 @@ import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import { useTranslation } from "react-i18next";
 import { alpha } from "@mui/material/styles";
 import toast from "react-hot-toast";
+import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 
 export default function Cart() {
   const { i18n } = useTranslation();
@@ -286,7 +287,7 @@ const handleDeleteComment = async (commentId, productId) => {
       pointerEvents: 'none'
     }}
   >
-    اضغط لعرض الصورة
+      {t('Viewtheimage')} <CenterFocusStrongIcon sx={{mx:1}}></CenterFocusStrongIcon>
   </Box>
 </Box>
 

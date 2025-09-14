@@ -8,7 +8,7 @@ import toast, { Toaster } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import { motion } from "framer-motion";
-
+import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 
 export default function Profile() {
   const [profile, setProfile] = useState(null);
@@ -495,7 +495,7 @@ const handleDelete = async (id) => {
       pointerEvents: 'none'
     }}
   >
-    اضغط لعرض الصورة
+   {t('Clicktoviewtheimage')} <CenterFocusStrongIcon sx={{mx:1}}></CenterFocusStrongIcon>
   </Box>
 </Box>
                 )}
@@ -935,11 +935,12 @@ const handleDelete = async (id) => {
                                         : "#eee",
                                     "&:hover": { bgcolor: "#fdd" },
                                     transform: "translateY(20px)",
+                                    mx:3
                                   }}
                                 >
                                   <DeleteOutlineIcon
                                     fontSize="small"
-                                    sx={{ color: "red" }}
+                                    sx={{ color: "red"  }}
                                   />
                                 </IconButton>
                               </Tooltip>

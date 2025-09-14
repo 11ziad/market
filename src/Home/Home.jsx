@@ -1,23 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../supabaseClient";
-import {
-  Box,
-  Typography,
-  Avatar,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  IconButton,
-  Button,
-  TextField,
-  Chip,
-  Card,
-  CardContent,
-  Divider,
-  Slider,
-  useMediaQuery,
-} from "@mui/material";
+import {Box,Typography,Avatar,CircularProgress,Dialog,DialogTitle,DialogContent,IconButton,Button,TextField,Chip,Card,CardContent,Divider,Slider,useMediaQuery,} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import PersonIcon from "@mui/icons-material/Person";
@@ -31,7 +14,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import TuneIcon from "@mui/icons-material/Tune";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@mui/material/styles";
-
+import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
+ 
 export default function Home() {
   const { t } = useTranslation();
   const [products, setProducts] = useState([]);
@@ -905,7 +889,8 @@ const closeProductModal = () => {
                           zIndex: 0,
                         }}
                       >
-                        view image
+                      {t('Viewtheimage')} <CenterFocusStrongIcon sx={{mx:1}}></CenterFocusStrongIcon>
+
                       </Box>
                     </Box>
                   </Box>

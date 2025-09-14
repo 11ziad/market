@@ -119,12 +119,15 @@ i18n
           allProduct:'جميع المنتجات',
           newaccount:'حساب جديد',
           profiledetails:'حساب المستخدم',
-          Tocommunicatewiththeprogrammer:' للتواصل مع المبرمج',
+          Clicktoviewtheimage:' اضغط لعرض الصورة',
+          Viewtheimage:'عرض الصورة',
            }
       },
       en: {
         translation: {
           profiledetails :'Profile User',
+          Viewtheimage:'View the image',
+          Clicktoviewtheimage:'Click to view the image',
           Tocommunicatewiththeprogrammer:'To communicate with the programmer',
           welcome: 'Welcome',
           newaccount:'New Account',

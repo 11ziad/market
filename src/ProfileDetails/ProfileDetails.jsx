@@ -11,6 +11,7 @@ import CallIcon from "@mui/icons-material/Call";
 import HomeIcon from "@mui/icons-material/Home";
 import { useTranslation } from "react-i18next";
 import MessageIcon from "@mui/icons-material/Message";
+import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong';
 
 export default function ProfileDetails() {
   const { id } = useParams();
@@ -763,7 +764,8 @@ const handleAddToCart = async (product) => {
       pointerEvents: 'none'
     }}
   >
-    اضغط لعرض الصورة
+            {t('Viewtheimage')} <CenterFocusStrongIcon sx={{mx:1}}></CenterFocusStrongIcon>
+
   </Box>
 </Box>
 <Dialog

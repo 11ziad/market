@@ -29,9 +29,9 @@ import { useTranslation } from "react-i18next";
 import { useTheme } from "@mui/material/styles";
 import ContactPhoneIcon from "@mui/icons-material/ContactPhone";
 import EmailIcon from "@mui/icons-material/Email";
-import CallIcon from '@mui/icons-material/Call';
+import CallIcon from "@mui/icons-material/Call";
 import Popover from "@mui/material/Popover";
-import AddShoppingCartRoundedIcon from '@mui/icons-material/AddShoppingCartRounded';
+import AddShoppingCartRoundedIcon from "@mui/icons-material/AddShoppingCartRounded";
 export default function Navbar({ toggleTheme, isDarkMode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -158,11 +158,19 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Link to="/" style={{ textDecoration: "none", color: "#fff" }}>
               <Typography variant="h6" sx={{ fontWeight: 700 }}>
-                 <AddShoppingCartRoundedIcon sx={{ transform: 'translateY(4px)' }}></AddShoppingCartRoundedIcon> Shoplio
+                <AddShoppingCartRoundedIcon
+                  sx={{ transform: "translateY(4px)" }}
+                ></AddShoppingCartRoundedIcon>{" "}
+                Shoplio
               </Typography>
             </Link>
-            <IconButton onClick={handleContactOpen}  sx={{
-    color: (theme) =>theme.palette.mode === "dark" ? "#fff" : "#fff",}}>
+            <IconButton
+              onClick={handleContactOpen}
+              sx={{
+                color: (theme) =>
+                  theme.palette.mode === "dark" ? "#fff" : "#fff",
+              }}
+            >
               <CallIcon />
             </IconButton>
           </Box>
@@ -283,7 +291,7 @@ export default function Navbar({ toggleTheme, isDarkMode }) {
       >
         {/* Title */}
         <Typography variant="subtitle1" sx={{ mb: 2, fontWeight: 600 }}>
-         {t(('Tocommunicatewiththeprogrammer'))}
+          {t("Tocommunicatewiththeprogrammer")}
         </Typography>
 
         {/* WhatsApp */}
