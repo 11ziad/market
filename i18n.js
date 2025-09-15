@@ -121,6 +121,7 @@ i18n
           profiledetails:'حساب المستخدم',
           Clicktoviewtheimage:' اضغط لعرض الصورة',
           Viewtheimage:'عرض الصورة',
+          Tocommunicatewiththeprogrammer:'للتواصل مع المبرمج'
            }
       },
       en: {
